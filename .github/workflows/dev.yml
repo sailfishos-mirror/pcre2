@@ -232,6 +232,9 @@ jobs:
           maint/RunPerlTest
 
   chaffinch:
+    # Job to verify that the CMake "unity" build (single-file / jumbo build) passes.
+    # If this fails, it's usually because two different files define some file-static
+    # functions or macros which collide.
     name: CMake unity build
     runs-on: ubuntu-latest
     steps:
@@ -250,6 +253,9 @@ jobs:
         run: cd build && ctest -j3 --output-on-failure
 
   heron:
+    # Job to verify that the tasks performed by PrepareRelease have been done. It is
+    # the committer's responsibility (currently) to run PrepareRelease themselves when
+    # making a PR, so that everything is kept in-sync.
     name: Check for PrepareRelease cleanliness
     runs-on: ubuntu-latest
     steps:
@@ -263,4 +269,17 @@ jobs:
 
       - name: Working directory clean
         run:  |
+          set +e
+          # XXX DEBUG
+          git status --porcelain
+          echo "STATUS: $?"
+
+          echo "DIFF"
+          git diff
+
+          echo "ENV"
+          env
+          # XXX DEBUG
+
           [ -z "`git status --porcelain`" ]
+          echo "STATUS 2: $?"

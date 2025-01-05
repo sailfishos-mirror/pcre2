@@ -58,7 +58,12 @@ performance issue because these strings are used only when there is an error.
 
 Each substring ends with \0 to insert a null character. This includes the final
 substring, so that the whole string ends with \0\0, which can be detected when
-counting through. */
+counting through.
+
+In the rare configuration of EBCDIC-with-ASCII-compiler, we currently output
+ASCII strings for the error messages, which is unlikely to cause complaints if
+some client does want to use PCRE2 on Linux or Windows to process their EBCDIC
+files. */
 
 static const unsigned char compile_error_texts[] =
   "no error\0"

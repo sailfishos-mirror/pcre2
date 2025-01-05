@@ -1,4 +1,3 @@
-PCRE2 version 10.32-RC1 2018-02-19
 # This is a specialized test for checking, when PCRE2 is compiled with the
 # EBCDIC option but in an ASCII environment, that newline, white space, and \c
 # functionality is working. It catches cases where explicit values such as 0x0a
@@ -12,195 +11,186 @@ PCRE2 version 10.32-RC1 2018-02-19
 /^A/m
     ABC
  0: A
-    12\x15ABC
+    12\nABC
  0: A
 
 /^A/m,newline=any
-    12\x15ABC
+    12\nABC
  0: A
-    12\x0dABC
+    12\rABC
  0: A
-    12\x0d\x15ABC
+    12\r\nABC
  0: A
-    12\x25ABC
+    12\x85ABC
  0: A
 
 /^A/m,newline=anycrlf
-    12\x15ABC
+    12\nABC
  0: A
-    12\x0dABC
+    12\rABC
  0: A
-    12\x0d\x15ABC
+    12\r\nABC
  0: A
-    ** Fail
-No match
-    12\x25ABC
+\= Expect no match
+    12\x85ABC
 No match
 
 # Test \h
 
-/^A\ˆ/
+/^A\h/
     A B
  0: A\x20
-    A\x41B 
+    A\x41B
  0: AA
 
 # Test \H
 
-/^A\È/
+/^A\H/
     AB
  0: AB
-    A\x42B 
+    A\x42B
  0: AB
-    ** Fail
-No match
+\= Expect no match
     A B
 No match
-    A\x41B 
+    A\x41B
 No match
 
 # Test \R
 
-/^A\Ù/
-    A\x15B
- 0: A\x15
-    A\x0dB
- 0: A\x0d
-    A\x25B
- 0: A\x25
+/^A\R/
+    A\nB
+ 0: A\n
+    A\rB
+ 0: A\r
+    A\x85B
+ 0: A\x85
     A\x0bB
  0: A\x0b
     A\x0cB
  0: A\x0c
-    ** Fail
-No match
+\= Expect no match
     A B
 No match
 
 # Test \v
 
-/^A\¥/
-    A\x15B
- 0: A\x15
-    A\x0dB
- 0: A\x0d
-    A\x25B
- 0: A\x25
+/^A\v/
+    A\nB
+ 0: A\n
+    A\rB
+ 0: A\r
+    A\x85B
+ 0: A\x85
     A\x0bB
  0: A\x0b
     A\x0cB
  0: A\x0c
-    ** Fail
-No match
+\= Expect no match
     A B
 No match
 
 # Test \V
 
-/^A\å/
+/^A\V/
     A B
  0: A\x20
-    ** Fail
+\= Expect no match
+    A\nB
 No match
-    A\x15B
+    A\rB
 No match
-    A\x0dB
-No match
-    A\x25B
+    A\x85B
 No match
     A\x0bB
 No match
     A\x0cB
 No match
-    
+
 # For repeated items, use an atomic group so that the output is the same
 # for DFA matching (otherwise it may show multiple matches).
 
 # Test \h+
 
-/^A(?>\ˆ+)/
+/^A(?>\h+)/
     A B
  0: A\x20
 
 # Test \H+
 
-/^A(?>\È+)/
+/^A(?>\H+)/
     AB
  0: AB
-    ** Fail
-No match
+\= Expect no match
     A B
 No match
 
 # Test \R+
 
-/^A(?>\Ù+)/
-    A\x15B
- 0: A\x15
-    A\x0dB
- 0: A\x0d
-    A\x25B
- 0: A\x25
+/^A(?>\R+)/
+    A\nB
+ 0: A\n
+    A\rB
+ 0: A\r
+    A\x85B
+ 0: A\x85
     A\x0bB
  0: A\x0b
     A\x0cB
  0: A\x0c
-    ** Fail
-No match
+\= Expect no match
     A B
 No match
 
 # Test \v+
 
-/^A(?>\¥+)/
-    A\x15B
- 0: A\x15
-    A\x0dB
- 0: A\x0d
-    A\x25B
- 0: A\x25
+/^A(?>\v+)/
+    A\nB
+ 0: A\n
+    A\rB
+ 0: A\r
+    A\x85B
+ 0: A\x85
     A\x0bB
  0: A\x0b
     A\x0cB
  0: A\x0c
-    ** Fail
-No match
+\= Expect no match
     A B
 No match
 
 # Test \V+
 
-/^A(?>\å+)/
+/^A(?>\V+)/
     A B
  0: A\x20B
-    ** Fail
+\= Expect no match
+    A\nB
 No match
-    A\x15B
+    A\rB
 No match
-    A\x0dB
-No match
-    A\x25B
+    A\x85B
 No match
     A\x0bB
 No match
     A\x0cB
 No match
-    
-# Test \c functionality 
-    
-/\ƒ@\ƒA\ƒb\ƒC\ƒd\ƒE\ƒf\ƒG\ƒh\ƒI\ƒJ\ƒK\ƒl\ƒm\ƒN\ƒO\ƒp\ƒq\ƒr\ƒS\ƒT\ƒu\ƒV\ƒW\ƒX\ƒy\ƒZ/
-    \x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f
- 0: \x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a
 
-/\ƒ[\ƒ\\ƒ]\ƒ^\ƒ_/
+# Test \c functionality
+
+/\ï¿½@\ï¿½A\ï¿½b\ï¿½C\ï¿½d\ï¿½E\ï¿½f\ï¿½G\ï¿½h\ï¿½I\ï¿½J\ï¿½K\ï¿½l\ï¿½m\ï¿½N\ï¿½O\ï¿½p\ï¿½q\ï¿½r\ï¿½S\ï¿½T\ï¿½u\ï¿½V\ï¿½W\ï¿½X\ï¿½y\ï¿½Z/
+    \x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\r\x0e\x0f\x10\x11\x12\x13\x14\n\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f
+ 0: \x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\r\x0e\x0f\x10\x11\x12\x13\x14\n\x16\x17\x18\x19\x1a
+
+/\ï¿½[\ï¿½\\ï¿½]\ï¿½^\ï¿½_/
     \x18\x19\x1a\x1b\x1c\x1d\x1e\x1f
  0: \x1b\x1c\x1d\x1e\x1f
-    
-/\ƒ?/
+
+/\ï¿½?/
     A\xffB
  0: \xff
 
-/\ƒ&/
+/\ï¿½&/
 Failed: error 168 at offset 3: \c\x20must\x20be\x20followed\x20by\x20a\x20letter\x20or\x20one\x20of\x20[\]^_\x3f
 
 # End

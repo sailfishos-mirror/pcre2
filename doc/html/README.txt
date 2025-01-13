@@ -833,6 +833,10 @@ The distribution should contain the files listed below.
   src/pcre2_chartables.c.dist  a default set of character tables that assume
                            ASCII coding; unless --enable-rebuild-chartables is
                            specified, used by copying to pcre2_chartables.c
+  src/pcre2_chartables.c.ebcdic-1047-{nl15,nl25}  a default set of character
+                           tables for EBCDIC 1047; used if
+                           --enable-ebcdic-ignoring-compiler is specified
+                           without --enable-rebuild-chartables
 
   src/pcre2posix.c           )
   src/pcre2_auto_possess.c   )

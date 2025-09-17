@@ -1,0 +1,157 @@
+/(?X)abdef/
+
+/(?z)abc/
+
+/(ab\2)/
+
+/(a)|\2/
+
+/(a)|\99/
+
+# OK, need to think about this one - *probably* no action
+/x{5,4}/
+
+/[z-a]/
+
+/[\200-\110]/
+
+/a+?+/
+
+/a+?+/
+
+/a{2,3}?+b/
+
+# TODO fix unterminated char class
+/[[:space:]/
+
+# I think this divergence is OK
+/(?1)/
+
+# I think this divergence is OK
+/(?99)/
+
+# Hmm, we are eager on the error for this one.
+/(?:(?(2y)a|b)(X))+/
+
+/(?P'abc'x)(?P<xyz>y)/
+
+/(?(''))/
+
+/(?('R')stuff)/
+
+/(?<A> (?'B' abc (?(R) (?(R&C)1) (?(R&B)2) X  |  (?1)  (?2)   (?R) ))) /x
+
+# our 8 is good
+/^(a)\g-2/
+
+# IGNORE This should be offset 8; HARD(ish)
+/^(a)\g{0}/
+
+/^(a)\g{3/
+
+/^(a)\g<3/
+
+/^(a)\g'3/
+
+/^(a)\k{a/
+
+/^(a)\k<a/
+
+/^(a)\k'a/
+
+/^(a)\g{aa}/
+
+# This divergence is OK
+/x(?-1)y/
+
+# All good at 12
+/\g6666666666/
+
+# Also good at 3
+/(?1)\c[/
+
+# I prefer 5, this is OK
+/a(*CR)b/
+
+# I think 9 is OK
+/(?<a>)(?&)/
+
+/(?<a>)(?&aaaaaaaaaaaaaaaaaaaaaaa)/
+
+/(?+-a)/
+
+/\k<>/
+
+/(?P=)/
+
+# I prefer our 4
+/(?P>)/
+
+# XXX 3 surely this is inconsistent with other conditions?
+/^(?(DEFINE) abc | xyz ) /x
+
+/)/
+
+# Our 2 is better
+/(*)b/
+
+# Accept this
+/(a)(?(1)a|b|c)/
+
+# And this
+/(?(?=a)a|b|c)/
+
+/*a/
+
+/a**/
+
+/(?<%)b/
+
+# TODO another missing terminating
+/[a[:xyz:/
+
+# TODO missing closing paren?
+/(abc/
+
+/[\R]/
+
+/[\z]/
+
+# Accept
+/(?<=ab(c+)d)ef/
+
+# our 4 is good
+/(?(1?)a|b)/
+
+/[:x:]/
+
+# XXX 4 hmm, should be 5
+/(?(10))/
+
+# Fine, I don't care
+/^\cé/
+
+# Accept
+/(?<=(abc)+)X/
+
+# XXX 1 consider
+/(?<0abc>xx)/
+
+# XXX 1 also consider
+/\k<5ghj>/
+
+/\k{2fgh}/
+
+/\k'2fgh'/
+
+/(?&1abc)xx(?<1abc>y)/
+
+# I reckon this is OK
+/(?R-:(?</
+
+/abcd/max_pattern_length=3
+
+/(abcdefg){10}hijklmnop/max_pattern_compiled_length=100
+
+# XXX 2 not good!
+/(?=a\Kb)ab/

@@ -405,7 +405,7 @@ extern int valid_utf(PCRE2_SPTR8, PCRE2_SIZE, PCRE2_SIZE *);
 #undef   PCRE2_SPTR
 
 /* If we have 8-bit support, default to it; if there is also 16-or 32-bit
-support, it can be selected by a command-line option. If there is no 8-bit
+support, it can be selected by a command line option. If there is no 8-bit
 support, there must be 16-bit or 32-bit support, so default to one of them. The
 config function, JIT stack, contexts, and version string are the same in all
 modes, so use the form of the first that is available. */
@@ -1038,7 +1038,6 @@ static BOOL inside_if = FALSE;
 static BOOL malloc_testing = FALSE;
 
 static int jitrc;                             /* Return from JIT compile */
-static int test_mode = DEFAULT_TEST_MODE; // XXX move down so it's not used in _inc
 static int timeit = 0;
 static int timeitm = 0;
 
@@ -1046,7 +1045,6 @@ clock_t total_compile_time = 0;
 clock_t total_jit_compile_time = 0;
 clock_t total_match_time = 0;
 
-static uint32_t code_unit_size;               /* Bytes */ // XXX get rid?
 static uint32_t dfa_matched;
 static uint32_t forbid_utf = 0;
 static uint32_t maxlookbehind;
@@ -2090,506 +2088,6 @@ while (top > bot)
   }
 
 return -1;
-
-}
-
-
-
-/*************************************************
-*        Check a modifer and find its field      *
-*************************************************/
-
-/* This function is called when a modifier has been identified. We check that
-it is allowed here and find the field that is to be changed.
-
-Arguments:
-  m          the modifier list entry
-  ctx        CTX_PAT     => pattern context
-             CTX_POPPAT  => pattern context for popped pattern
-             CTX_DEFPAT  => default pattern context
-             CTX_DAT     => data context
-             CTX_DEFDAT  => default data context
-  pctl       point to pattern control block
-  dctl       point to data control block
-  c          a single character or 0
-
-Returns:     a field pointer or NULL
-*/
-
-static void *
-check_modifier(modstruct *m, int ctx, patctl *pctl, datctl *dctl, uint32_t c)
-{
-void *field = NULL;
-PCRE2_SIZE offset = m->offset;
-
-if (restrict_for_perl_test) switch(m->which)
-  {
-  case MOD_PNDP:
-  case MOD_PATP:
-  case MOD_DATP:
-  case MOD_PDP:
-  break;
-
-  default:
-  fprintf(outfile, "** \"%s\" is not allowed in a Perl-compatible test\n",
-    m->name);
-  return NULL;
-  }
-
-switch (m->which)
-  {
-  case MOD_CTC:  /* Compile context modifier */
-  if (ctx == CTX_DEFPAT) field = PTR(default_pat_context);
-    else if (ctx == CTX_PAT) field = PTR(pat_context);
-  break;
-
-  case MOD_CTM:  /* Match context modifier */
-  if (ctx == CTX_DEFDAT) field = PTR(default_dat_context);
-    else if (ctx == CTX_DAT) field = PTR(dat_context);
-  break;
-
-  case MOD_DAT:    /* Data line modifier */
-  case MOD_DATP:   /* Allowed for Perl test */
-  if (dctl != NULL) field = dctl;
-  break;
-
-  case MOD_PAT:    /* Pattern modifier */
-  case MOD_PATP:   /* Allowed for Perl test */
-  if (pctl != NULL) field = pctl;
-  break;
-
-  case MOD_PD:   /* Pattern or data line modifier */
-  case MOD_PDP:  /* Ditto, allowed for Perl test */
-  case MOD_PND:  /* Ditto, but not default pattern */
-  case MOD_PNDP: /* Ditto, allowed for Perl test */
-  if (dctl != NULL) field = dctl;
-    else if (pctl != NULL && (m->which == MOD_PD || m->which == MOD_PDP ||
-             ctx != CTX_DEFPAT))
-      field = pctl;
-  break;
-  }
-
-if (field == NULL)
-  {
-  if (c == 0)
-    fprintf(outfile, "** \"%s\" is not valid here\n", m->name);
-  else
-    fprintf(outfile, "** /%c is not valid here\n", c);
-  return NULL;
-  }
-
-return (char *)field + offset;
-}
-
-
-
-/*************************************************
-*            Decode a modifier list              *
-*************************************************/
-
-/* A pointer to a control block is NULL when called in cases when that block is
-not relevant. They are never all relevant in one call. At least one of patctl
-and datctl is NULL. The second argument specifies which context to use for
-modifiers that apply to contexts.
-
-Arguments:
-  p          point to modifier string
-  ctx        CTX_PAT     => pattern context
-             CTX_POPPAT  => pattern context for popped pattern
-             CTX_DEFPAT  => default pattern context
-             CTX_DAT     => data context
-             CTX_DEFDAT  => default data context
-  pctl       point to pattern control block
-  dctl       point to data control block
-
-Returns: TRUE if successful decode, FALSE otherwise
-*/
-
-static BOOL
-decode_modifiers(uint8_t *p, int ctx, patctl *pctl, datctl *dctl)
-{
-uint8_t *ep, *pp;
-long li;
-unsigned long uli;
-BOOL first = TRUE;
-
-for (;;)
-  {
-  void *field;
-  modstruct *m;
-  BOOL off = FALSE;
-  unsigned int i;
-  size_t len;
-  int index;
-  char *endptr;
-
-  /* Skip white space and commas. */
-
-  while (isspace(*p) || *p == ',') p++;
-  if (*p == 0) break;
-
-  /* Find the end of the item; lose trailing whitespace at end of line. */
-
-  for (ep = p; *ep != 0 && *ep != ','; ep++);
-  if (*ep == 0)
-    {
-    while (ep > p && isspace(ep[-1])) ep--;
-    *ep = 0;
-    }
-
-  /* Remember if the first character is '-'. */
-
-  if (*p == '-')
-    {
-    off = TRUE;
-    p++;
-    }
-
-  /* Find the length of a full-length modifier name, and scan for it. */
-
-  pp = p;
-  while (pp < ep && *pp != '=') pp++;
-  index = scan_modifiers(p, pp - p);
-
-  /* If the first modifier is unrecognized, try to interpret it as a sequence
-  of single-character abbreviated modifiers. None of these modifiers have any
-  associated data. They just set options or control bits. */
-
-  if (index < 0)
-    {
-    uint32_t cc;
-    uint8_t *mp = p;
-
-    if (!first)
-      {
-      fprintf(outfile, "** Unrecognized modifier \"%.*s\"\n", (int)(ep-p), p);
-      if (ep - p == 1)
-        fprintf(outfile, "** Single-character modifiers must come first\n");
-      return FALSE;
-      }
-
-    first = FALSE;
-
-    for (cc = *p; cc != ',' && cc != '\n' && cc != 0; cc = *(++p))
-      {
-      for (i = 0; i < C1MODLISTCOUNT; i++)
-        if (cc == c1modlist[i].onechar) break;
-
-      if (i >= C1MODLISTCOUNT)
-        {
-        fprintf(outfile, "** Unrecognized modifier '%c' in modifier string "
-          "\"%.*s\"\n", *p, (int)(ep-mp), mp);
-        return FALSE;
-        }
-
-      if (c1modlist[i].index >= 0)
-        {
-        index = c1modlist[i].index;
-        }
-
-      else
-        {
-        index = scan_modifiers((const uint8_t *)(c1modlist[i].fullname),
-          strlen(c1modlist[i].fullname));
-        if (index < 0)
-          {
-          fprintf(outfile, "** Internal error: single-character equivalent "
-            "modifier \"%s\" not found\n", c1modlist[i].fullname);
-          return FALSE;
-          }
-        c1modlist[i].index = index;     /* Cache for next time */
-        }
-
-      field = check_modifier(modlist + index, ctx, pctl, dctl, *p);
-      if (field == NULL) return FALSE;
-
-      /* /x is a special case; a second appearance changes PCRE2_EXTENDED to
-      PCRE2_EXTENDED_MORE. */
-
-      if (cc == 'x' && (*((uint32_t *)field) & PCRE2_EXTENDED) != 0)
-        {
-        *((uint32_t *)field) &= ~PCRE2_EXTENDED;
-        *((uint32_t *)field) |= PCRE2_EXTENDED_MORE;
-        }
-      else
-        *((uint32_t *)field) |= modlist[index].value;
-      }
-
-    continue;    /* With tne next (fullname) modifier */
-    }
-
-  /* We have a match on a full-name modifier. Check for the existence of data
-  when needed. */
-
-  m = modlist + index;      /* Save typing */
-  if (m->type != MOD_CTL && m->type != MOD_OPT && m->type != MOD_OPTMZ &&
-      (m->type != MOD_IND || *pp == '='))
-    {
-    if (*pp++ != '=')
-      {
-      fprintf(outfile, "** '=' expected after \"%s\"\n", m->name);
-      return FALSE;
-      }
-    if (off)
-      {
-      fprintf(outfile, "** '-' is not valid for \"%s\"\n", m->name);
-      return FALSE;
-      }
-    }
-
-  /* These on/off types have no data. */
-
-  else if (*pp != ',' && *pp != '\n' && *pp != ' ' && *pp != 0)
-    {
-    fprintf(outfile, "** Unrecognized modifier '%.*s'\n", (int)(ep-p), p);
-    return FALSE;
-    }
-
-  /* Set the data length for those types that have data. Then find the field
-  that is to be set. If check_modifier() returns NULL, it has already output an
-  error message. */
-
-  len = ep - pp;
-  field = check_modifier(m, ctx, pctl, dctl, 0);
-  if (field == NULL) return FALSE;
-
-  /* Process according to data type. */
-
-  switch (m->type)
-    {
-    case MOD_CTL:
-    case MOD_OPT:
-    if (off) *((uint32_t *)field) &= ~m->value;
-      else *((uint32_t *)field) |= m->value;
-    break;
-
-    case MOD_OPTMZ:
-#ifdef SUPPORT_PCRE2_8
-    if (test_mode == PCRE8_MODE)
-      pcre2_set_optimize_8((pcre2_compile_context_8*)field, m->value);
-#endif
-#ifdef SUPPORT_PCRE2_16
-    if (test_mode == PCRE16_MODE)
-      pcre2_set_optimize_16((pcre2_compile_context_16*)field, m->value);
-#endif
-#ifdef SUPPORT_PCRE2_32
-    if (test_mode == PCRE32_MODE)
-      pcre2_set_optimize_32((pcre2_compile_context_32*)field, m->value);
-#endif
-    break;
-
-    case MOD_BSR:
-    if (len == 7 && strncmpic(pp, (const uint8_t *)"default", 7) == 0)
-      {
-#ifdef BSR_ANYCRLF
-      *((uint16_t *)field) = PCRE2_BSR_ANYCRLF;
-#else
-      *((uint16_t *)field) = PCRE2_BSR_UNICODE;
-#endif
-      if (ctx == CTX_PAT || ctx == CTX_DEFPAT) pctl->control2 &= ~CTL2_BSR_SET;
-        else dctl->control2 &= ~CTL2_BSR_SET;
-      }
-    else
-      {
-      if (len == 7 && strncmpic(pp, (const uint8_t *)"anycrlf", 7) == 0)
-        *((uint16_t *)field) = PCRE2_BSR_ANYCRLF;
-      else if (len == 7 && strncmpic(pp, (const uint8_t *)"unicode", 7) == 0)
-        *((uint16_t *)field) = PCRE2_BSR_UNICODE;
-      else goto INVALID_VALUE;
-      if (ctx == CTX_PAT || ctx == CTX_DEFPAT) pctl->control2 |= CTL2_BSR_SET;
-        else dctl->control2 |= CTL2_BSR_SET;
-      }
-    pp = ep;
-    break;
-
-    case MOD_CHR:  /* A single character */
-    *((uint32_t *)field) = *pp++;
-    break;
-
-    case MOD_CON:  /* A convert type/options list */
-    for (;; pp++)
-      {
-      uint8_t *colon = (uint8_t *)strchr((const char *)pp, ':');
-      len = ((colon != NULL && colon < ep)? colon:ep) - pp;
-      for (i = 0; i < convertlistcount; i++)
-        {
-        if (strncmpic(pp, (const uint8_t *)convertlist[i].name, len) == 0)
-          {
-          if (*((uint32_t *)field) == CONVERT_UNSET)
-            *((uint32_t *)field) = convertlist[i].option;
-          else
-            *((uint32_t *)field) |= convertlist[i].option;
-          break;
-          }
-        }
-      if (i >= convertlistcount) goto INVALID_VALUE;
-      pp += len;
-      if (*pp != ':') break;
-      }
-    break;
-
-    case MOD_IN2:    /* One or two unsigned integers */
-    if (!isdigit(*pp)) goto INVALID_VALUE;
-    uli = strtoul((const char *)pp, &endptr, 10);
-    if (U32OVERFLOW(uli)) goto INVALID_VALUE;
-    ((uint32_t *)field)[0] = (uint32_t)uli;
-    if (*endptr == ':')
-      {
-      uli = strtoul((const char *)endptr+1, &endptr, 10);
-      if (U32OVERFLOW(uli)) goto INVALID_VALUE;
-      ((uint32_t *)field)[1] = (uint32_t)uli;
-      }
-    else ((uint32_t *)field)[1] = 0;
-    pp = (uint8_t *)endptr;
-    break;
-
-    /* PCRE2_SIZE_MAX is usually SIZE_MAX, which may be greater, equal to, or
-    less than ULONG_MAX. So first test for overflowing the long int, and then
-    test for overflowing PCRE2_SIZE_MAX if it is smaller than ULONG_MAX. */
-
-    case MOD_SIZ:    /* PCRE2_SIZE value */
-    if (!isdigit(*pp)) goto INVALID_VALUE;
-    uli = strtoul((const char *)pp, &endptr, 10);
-    if (uli == ULONG_MAX) goto INVALID_VALUE;
-#if ULONG_MAX > PCRE2_SIZE_MAX
-    if (uli > PCRE2_SIZE_MAX) goto INVALID_VALUE;
-#endif
-    *((PCRE2_SIZE *)field) = (PCRE2_SIZE)uli;
-    pp = (uint8_t *)endptr;
-    break;
-
-    case MOD_IND:    /* Unsigned integer with default */
-    if (len == 0)
-      {
-      *((uint32_t *)field) = (uint32_t)(m->value);
-      break;
-      }
-    PCRE2_FALLTHROUGH /* Fall through */
-
-    case MOD_INT:    /* Unsigned integer */
-    if (!isdigit(*pp)) goto INVALID_VALUE;
-    uli = strtoul((const char *)pp, &endptr, 10);
-    if (U32OVERFLOW(uli)) goto INVALID_VALUE;
-    *((uint32_t *)field) = (uint32_t)uli;
-    pp = (uint8_t *)endptr;
-    break;
-
-    case MOD_INS:   /* Signed integer */
-    if (!isdigit(*pp) && *pp != '-') goto INVALID_VALUE;
-    li = strtol((const char *)pp, &endptr, 10);
-    if (S32OVERFLOW(li)) goto INVALID_VALUE;
-    *((int32_t *)field) = (int32_t)li;
-    pp = (uint8_t *)endptr;
-    break;
-
-    case MOD_NL:
-    for (i = 0; i < sizeof(newlines)/sizeof(char *); i++)
-      if (len == strlen(newlines[i]) &&
-        strncmpic(pp, (const uint8_t *)newlines[i], len) == 0) break;
-    if (i >= sizeof(newlines)/sizeof(char *)) goto INVALID_VALUE;
-    if (i == 0)
-      {
-      *((uint16_t *)field) = NEWLINE_DEFAULT;
-      if (ctx == CTX_PAT || ctx == CTX_DEFPAT) pctl->control2 &= ~CTL2_NL_SET;
-        else dctl->control2 &= ~CTL2_NL_SET;
-      }
-    else
-      {
-      *((uint16_t *)field) = i;
-      if (ctx == CTX_PAT || ctx == CTX_DEFPAT) pctl->control2 |= CTL2_NL_SET;
-        else dctl->control2 |= CTL2_NL_SET;
-      }
-    pp = ep;
-    break;
-
-    case MOD_NN:              /* Name or (signed) number; may be several */
-    if (isdigit(*pp) || *pp == '-')
-      {
-      int ct = MAXCPYGET - 1;
-      int32_t value;
-      li = strtol((const char *)pp, &endptr, 10);
-      if (S32OVERFLOW(li)) goto INVALID_VALUE;
-      value = (int32_t)li;
-      field = (char *)field - m->offset + m->value;      /* Adjust field ptr */
-      if (value >= 0)                                    /* Add new number */
-        {
-        while (*((int32_t *)field) >= 0 && ct-- > 0)   /* Skip previous */
-          field = (char *)field + sizeof(int32_t);
-        if (ct <= 0)
-          {
-          fprintf(outfile, "** Too many numeric \"%s\" modifiers\n", m->name);
-          return FALSE;
-          }
-        }
-      *((int32_t *)field) = value;
-      if (ct > 0) ((int32_t *)field)[1] = -1;
-      pp = (uint8_t *)endptr;
-      }
-
-    /* Multiple strings are put end to end. */
-
-    else
-      {
-      char *nn = (char *)field;
-      if (len > 0)                    /* Add new name */
-        {
-        if (len > MAX_NAME_SIZE)
-          {
-          fprintf(outfile, "** Group name in \"%s\" is too long\n", m->name);
-          return FALSE;
-          }
-        while (*nn != 0) nn += strlen(nn) + 1;
-        if (nn + len + 2 - (char *)field > LENCPYGET)
-          {
-          fprintf(outfile, "** Too many characters in named \"%s\" modifiers\n",
-            m->name);
-          return FALSE;
-          }
-        memcpy(nn, pp, len);
-        }
-      nn[len] = 0 ;
-      nn[len+1] = 0;
-      pp = ep;
-      }
-    break;
-
-    case MOD_STR:
-    if (len + 1 > m->value)
-      {
-      fprintf(outfile, "** Overlong value for \"%s\" (max %d code units)\n",
-        m->name, m->value - 1);
-      return FALSE;
-      }
-    memcpy(field, pp, len);
-    ((uint8_t *)field)[len] = 0;
-    pp = ep;
-    break;
-    }
-
-  if (*pp != ',' && *pp != '\n' && *pp != ' ' && *pp != 0)
-    {
-    fprintf(outfile, "** Comma expected after modifier item \"%s\"\n", m->name);
-    return FALSE;
-    }
-
-  p = pp;
-
-  if (ctx == CTX_POPPAT &&
-     (pctl->options != 0 ||
-      pctl->tables_id != 0 ||
-      pctl->locale[0] != 0 ||
-      (pctl->control & NOTPOP_CONTROLS) != 0))
-    {
-    fprintf(outfile, "** \"%s\" is not valid here\n", m->name);
-    return FALSE;
-    }
-  }
-
-return TRUE;
-
-INVALID_VALUE:
-fprintf(outfile, "** Invalid value in \"%.*s\"\n", (int)(ep-p), p);
-return FALSE;
 }
 
 
@@ -3250,6 +2748,247 @@ for (i = 0; i < 2*oveccount; i += 2)
 
 
 /*************************************************
+*            Mode-dependent code                 *
+*************************************************/
+
+/* All the mode-independent utilities should go above this section, so that
+the mode-dependent code can use them.
+
+The structure is:
+   main
+     -> calls into usage, command line parsing, top-level dispatch
+       -> calls into mode-dependent code to handle input lines
+         -> calls into mode-independent utilities
+
+The ordering of the code blocks is therefore:
+  - mode-independent utilities (ABOVE THIS SECTION)
+  - mode-dependent code to handle input lines (THIS SECTION)
+  - usage, command line parsing, top-level dispatch (NEXT SECTION)
+  - main (AT THE BOTTOM)
+*/
+
+/* --- Repeated pre-processor inclusions to build the mode-dependent code -- */
+
+// XXX dummy forward-declares
+static BOOL
+print_error_message_file_8(FILE *file, int errorcode, const char *before,
+  const char *after, BOOL badcode_ok);
+static void init_globals_8(void);
+static BOOL
+decode_modifiers_8(uint8_t *p, int ctx, patctl *pctl, datctl *dctl);
+static BOOL have_active_pattern_8(void);
+static void free_active_pattern_8(void);
+static int process_data_8(void);
+static int process_command_8(void);
+static int process_pattern_8(void);
+
+/* --------------------------- Static variables ---------------------------- */
+
+/* Declared after mode-dependent code. */
+
+static int test_mode = DEFAULT_TEST_MODE;
+
+/* -------------------- Mode-dependent dispatch wrappers ------------------- */
+
+// XXX find a way here and elsewhere to compress these blocks with macros
+// XXX check order for these
+
+static int
+pcre2_jit_compile_test(void)
+{
+#ifdef SUPPORT_PCRE2_8
+if (test_mode == PCRE8_MODE)
+  return pcre2_jit_compile_8(NULL, PCRE2_JIT_TEST_ALLOC);
+#endif
+#ifdef SUPPORT_PCRE2_16
+if (test_mode == PCRE16_MODE)
+  return pcre2_jit_compile_16(NULL, PCRE2_JIT_TEST_ALLOC);
+#endif
+#ifdef SUPPORT_PCRE2_32
+if (test_mode == PCRE32_MODE)
+  return pcre2_jit_compile_32(NULL, PCRE2_JIT_TEST_ALLOC);
+#endif
+
+/* LCOV_EXCL_START */
+PCRE2_UNREACHABLE();
+return 0;
+/* LCOV_EXCL_STOP */
+}
+
+static int
+pcre2_config(uint32_t what, void *where)
+{
+#ifdef SUPPORT_PCRE2_8
+if (test_mode == PCRE8_MODE)
+  return pcre2_config_8(what, where);
+#endif
+#ifdef SUPPORT_PCRE2_16
+if (test_mode == PCRE16_MODE)
+  return pcre2_config_16(what, where);
+#endif
+#ifdef SUPPORT_PCRE2_32
+if (test_mode == PCRE32_MODE)
+  return pcre2_config_32(what, where);
+#endif
+
+/* LCOV_EXCL_START */
+PCRE2_UNREACHABLE();
+return 0;
+/* LCOV_EXCL_STOP */
+}
+
+static BOOL
+print_error_message_file(FILE *file, int errorcode, const char *before,
+  const char *after, BOOL badcode_ok)
+{
+#ifdef SUPPORT_PCRE2_8
+if (test_mode == PCRE8_MODE)
+  return print_error_message_file_8(file, errorcode, before, after, badcode_ok);
+#endif
+#ifdef SUPPORT_PCRE2_16
+if (test_mode == PCRE16_MODE)
+  return print_error_message_file_16(file, errorcode, before, after, badcode_ok);
+#endif
+#ifdef SUPPORT_PCRE2_32
+if (test_mode == PCRE32_MODE)
+  return print_error_message_file_32(file, errorcode, before, after, badcode_ok);
+#endif
+
+/* LCOV_EXCL_START */
+PCRE2_UNREACHABLE();
+return FALSE;
+/* LCOV_EXCL_STOP */
+}
+
+static BOOL
+decode_modifiers(uint8_t *p, int ctx, patctl *pctl, datctl *dctl)
+{
+#ifdef SUPPORT_PCRE2_8
+if (test_mode == PCRE8_MODE)
+  return decode_modifiers_8(p, ctx, pctl, dctl);
+#endif
+#ifdef SUPPORT_PCRE2_16
+if (test_mode == PCRE16_MODE)
+  return decode_modifiers_16(p, ctx, pctl, dctl);
+#endif
+#ifdef SUPPORT_PCRE2_32
+if (test_mode == PCRE32_MODE)
+  return decode_modifiers_32(p, ctx, pctl, dctl);
+#endif
+
+/* LCOV_EXCL_START */
+PCRE2_UNREACHABLE();
+return FALSE;
+/* LCOV_EXCL_STOP */
+}
+
+static BOOL
+have_active_pattern(void)
+{
+#ifdef SUPPORT_PCRE2_8
+if (test_mode == PCRE8_MODE) return have_active_pattern_8();
+#endif
+#ifdef SUPPORT_PCRE2_16
+if (test_mode == PCRE16_MODE) return have_active_pattern_16();
+#endif
+#ifdef SUPPORT_PCRE2_32
+if (test_mode == PCRE32_MODE) return have_active_pattern_32();
+#endif
+
+/* LCOV_EXCL_START */
+PCRE2_UNREACHABLE();
+return FALSE;
+/* LCOV_EXCL_STOP */
+}
+
+static void
+free_active_pattern(void)
+{
+#ifdef SUPPORT_PCRE2_8
+if (test_mode == PCRE8_MODE) free_active_pattern_8();
+#endif
+#ifdef SUPPORT_PCRE2_16
+if (test_mode == PCRE16_MODE) free_active_pattern_16();
+#endif
+#ifdef SUPPORT_PCRE2_32
+if (test_mode == PCRE32_MODE) free_active_pattern_32();
+#endif
+}
+
+static int
+process_data(void)
+{
+#ifdef SUPPORT_PCRE2_8
+if (test_mode == PCRE8_MODE) return process_data_8();
+#endif
+#ifdef SUPPORT_PCRE2_16
+if (test_mode == PCRE16_MODE) return process_data_16();
+#endif
+#ifdef SUPPORT_PCRE2_32
+if (test_mode == PCRE32_MODE) return process_data_32();
+#endif
+
+/* LCOV_EXCL_START */
+PCRE2_UNREACHABLE();
+return 0;
+/* LCOV_EXCL_STOP */
+}
+
+static int
+process_command(void)
+{
+#ifdef SUPPORT_PCRE2_8
+if (test_mode == PCRE8_MODE) return process_command_8();
+#endif
+#ifdef SUPPORT_PCRE2_16
+if (test_mode == PCRE16_MODE) return process_command_16();
+#endif
+#ifdef SUPPORT_PCRE2_32
+if (test_mode == PCRE32_MODE) return process_command_32();
+#endif
+
+/* LCOV_EXCL_START */
+PCRE2_UNREACHABLE();
+return 0;
+/* LCOV_EXCL_STOP */
+}
+
+static int
+process_pattern(void)
+{
+#ifdef SUPPORT_PCRE2_8
+if (test_mode == PCRE8_MODE) return process_pattern_8();
+#endif
+#ifdef SUPPORT_PCRE2_16
+if (test_mode == PCRE16_MODE) return process_pattern_16();
+#endif
+#ifdef SUPPORT_PCRE2_32
+if (test_mode == PCRE32_MODE) return process_pattern_32();
+#endif
+
+/* LCOV_EXCL_START */
+PCRE2_UNREACHABLE();
+return 0;
+/* LCOV_EXCL_STOP */
+}
+
+static void
+init_globals(void)
+{
+#ifdef SUPPORT_PCRE2_8
+if (test_mode == PCRE8_MODE) init_globals_8();
+#endif
+#ifdef SUPPORT_PCRE2_16
+if (test_mode == PCRE16_MODE) init_globals_16();
+#endif
+#ifdef SUPPORT_PCRE2_32
+if (test_mode == PCRE32_MODE) init_globals_32();
+#endif
+}
+
+
+
+/*************************************************
 *               Print PCRE2 version              *
 *************************************************/
 
@@ -3424,7 +3163,7 @@ if (arg != NULL && arg[0] != '-')
   switch (coptlist[i].type)
     {
     case CONF_BSR:
-    PCRE2_CONFIGV(coptlist[i].value, &optval);
+    (void)pcre2_config(coptlist[i].value, &optval);
     printf("%s\n", (optval == PCRE2_BSR_ANYCRLF)? "ANYCRLF" : "ANY");
     break;
 
@@ -3434,18 +3173,17 @@ if (arg != NULL && arg[0] != '-')
     break;
 
     case CONF_INT:
-    PCRE2_CONFIGV(coptlist[i].value, &yield);
+    (void)pcre2_config(coptlist[i].value, &yield);
     printf("%d\n", yield);
     break;
 
     case CONF_NL:
-    PCRE2_CONFIGV(coptlist[i].value, &optval);
+    (void)pcre2_config(coptlist[i].value, &optval);
     print_newline_config(optval, TRUE);
     break;
 
     case CONF_JU:
-    SET(compiled_code, NULL);
-    PCRE2_JIT_COMPILE(yield, compiled_code, PCRE2_JIT_TEST_ALLOC);
+    yield = pcre2_jit_compile_test();
     switch(yield)
       {
       case 0: break;
@@ -3509,7 +3247,7 @@ printf("  Input/output for pcre2test is ASCII, not EBCDIC\n");
 #endif
 #endif
 
-PCRE2_CONFIGV(PCRE2_CONFIG_COMPILED_WIDTHS, &optval);
+(void)pcre2_config(PCRE2_CONFIG_COMPILED_WIDTHS, &optval);
 if (optval & 1) printf("  8-bit support\n");
 if (optval & 2) printf("  16-bit support\n");
 if (optval & 4) printf("  32-bit support\n");
@@ -3518,7 +3256,7 @@ if (optval & 4) printf("  32-bit support\n");
 printf("  Valgrind support\n");
 #endif
 
-PCRE2_CONFIGV(PCRE2_CONFIG_UNICODE, &optval);
+(void)pcre2_config(PCRE2_CONFIG_UNICODE, &optval);
 if (optval != 0)
   {
   printf("  UTF and UCP support (");
@@ -3527,7 +3265,7 @@ if (optval != 0)
   }
 else printf("  No Unicode support\n");
 
-PCRE2_CONFIGV(PCRE2_CONFIG_JIT, &optval);
+(void)pcre2_config(PCRE2_CONFIG_JIT, &optval);
 if (optval != 0)
   {
   printf("  Just-in-time compiler support\n");
@@ -3536,8 +3274,7 @@ if (optval != 0)
   printf("\n");
 
   printf("    Can allocate executable memory: ");
-  SET(compiled_code, NULL);
-  PCRE2_JIT_COMPILE(yield, compiled_code, PCRE2_JIT_TEST_ALLOC);
+  yield = pcre2_jit_compile_test();
   switch(yield)
     {
     case 0:
@@ -3560,26 +3297,26 @@ else
   printf("  No just-in-time compiler support\n");
   }
 
-PCRE2_CONFIGV(PCRE2_CONFIG_NEWLINE, &optval);
+(void)pcre2_config(PCRE2_CONFIG_NEWLINE, &optval);
 print_newline_config(optval, FALSE);
-PCRE2_CONFIGV(PCRE2_CONFIG_BSR, &optval);
+(void)pcre2_config(PCRE2_CONFIG_BSR, &optval);
 printf("  \\R matches %s\n",
   (optval == PCRE2_BSR_ANYCRLF)? "CR, LF, or CRLF only" :
                                  "all Unicode newlines");
-PCRE2_CONFIGV(PCRE2_CONFIG_NEVER_BACKSLASH_C, &optval);
+(void)pcre2_config(PCRE2_CONFIG_NEVER_BACKSLASH_C, &optval);
 printf("  \\C is %ssupported\n", optval? "not ":"");
 printf("  Internal link size\n");
-PCRE2_CONFIGV(PCRE2_CONFIG_LINKSIZE, &optval);
+(void)pcre2_config(PCRE2_CONFIG_LINKSIZE, &optval);
 printf("    Requested = %d\n", optval);
-PCRE2_CONFIGV(PCRE2_CONFIG_EFFECTIVE_LINKSIZE, &optval);
+(void)pcre2_config(PCRE2_CONFIG_EFFECTIVE_LINKSIZE, &optval);
 printf("    Effective = %d\n", optval);
-PCRE2_CONFIGV(PCRE2_CONFIG_PARENSLIMIT, &optval);
+(void)pcre2_config(PCRE2_CONFIG_PARENSLIMIT, &optval);
 printf("  Parentheses nest limit = %d\n", optval);
-PCRE2_CONFIGV(PCRE2_CONFIG_HEAPLIMIT, &optval);
+(void)pcre2_config(PCRE2_CONFIG_HEAPLIMIT, &optval);
 printf("  Default heap limit = %d kibibytes\n", optval);
-PCRE2_CONFIGV(PCRE2_CONFIG_MATCHLIMIT, &optval);
+(void)pcre2_config(PCRE2_CONFIG_MATCHLIMIT, &optval);
 printf("  Default match limit = %d\n", optval);
-PCRE2_CONFIGV(PCRE2_CONFIG_DEPTHLIMIT, &optval);
+(void)pcre2_config(PCRE2_CONFIG_DEPTHLIMIT, &optval);
 printf("  Default depth limit = %d\n", optval);
 
 #if defined SUPPORT_LIBREADLINE
@@ -3909,32 +3646,32 @@ if (PO(options) != DO(options) || PO(control) != DO(control) ||
 same time checking that a request for the length gives the same answer. Also
 check lengths for non-string items. */
 
-PCRE2_CONFIG(r1, PCRE2_CONFIG_VERSION, NULL);
-PCRE2_CONFIG(r2, PCRE2_CONFIG_VERSION, version);
+r1 = pcre2_config(PCRE2_CONFIG_VERSION, NULL);
+r2 = pcre2_config(PCRE2_CONFIG_VERSION, version);
 if (r1 != r2)
   {
   fprintf(stderr, "** Error in pcre2_config(PCRE2_CONFIG_VERSION): bad length\n");
   return 1;
   }
 
-PCRE2_CONFIG(r1, PCRE2_CONFIG_UNICODE_VERSION, NULL);
-PCRE2_CONFIG(r2, PCRE2_CONFIG_UNICODE_VERSION, uversion);
+r1 = pcre2_config(PCRE2_CONFIG_UNICODE_VERSION, NULL);
+r2 = pcre2_config(PCRE2_CONFIG_UNICODE_VERSION, uversion);
 if (r1 != r2)
   {
   fprintf(stderr, "** Error in pcre2_config(PCRE2_CONFIG_UNICODE_VERSION): bad length\n");
   return 1;
   }
 
-PCRE2_CONFIG(r1, PCRE2_CONFIG_JITTARGET, NULL);
-PCRE2_CONFIG(r2, PCRE2_CONFIG_JITTARGET, jittarget);
+r1 = pcre2_config(PCRE2_CONFIG_JITTARGET, NULL);
+r2 = pcre2_config(PCRE2_CONFIG_JITTARGET, jittarget);
 if (r1 != r2)
   {
   fprintf(stderr, "** Error in pcre2_config(PCRE2_CONFIG_JITTARGET): bad length\n");
   return 1;
   }
 
-PCRE2_CONFIG(r1, PCRE2_CONFIG_UNICODE, NULL);
-PCRE2_CONFIG(r2, PCRE2_CONFIG_MATCHLIMIT, NULL);
+r1 = pcre2_config(PCRE2_CONFIG_UNICODE, NULL);
+r2 = pcre2_config(PCRE2_CONFIG_MATCHLIMIT, NULL);
 if (r1 != r2 || r1 != sizeof(uint32_t))
   {
   fprintf(stderr, "** Error in pcre2_config(): bad length\n");
@@ -3943,8 +3680,8 @@ if (r1 != r2 || r1 != sizeof(uint32_t))
 
 /* Check that bad options are diagnosed. */
 
-PCRE2_CONFIG(r1, 999, NULL);
-PCRE2_CONFIG(r2, 999, &temp);
+r1 = pcre2_config(999, NULL);
+r2 = pcre2_config(999, &temp);
 
 if (r1 != r2 || r2 != PCRE2_ERROR_BADOPTION)
   {
@@ -3955,8 +3692,8 @@ if (r1 != r2 || r2 != PCRE2_ERROR_BADOPTION)
 /* This configuration option is now obsolete, but running a quick check ensures
 that its code is covered. */
 
-PCRE2_CONFIGV(PCRE2_CONFIG_STACKRECURSE, &temp);
-PCRE2_CONFIGV(PCRE2_CONFIG_LINKSIZE, &temp);
+(void)pcre2_config(PCRE2_CONFIG_STACKRECURSE, &temp);
+(void)pcre2_config(PCRE2_CONFIG_LINKSIZE, &temp);
 
 /* Get buffers from malloc() so that valgrind will check their misuse when
 debugging. They grow automatically when very long lines are read. The 16-
@@ -4034,12 +3771,15 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
   configured. Also call some other functions that are not otherwise used. This
   means that a coverage report won't claim there are uncalled functions. */
 
+  // XXX ^^^ remove silly coverage things stuffed in here for no reason
+
   if (strcmp(arg, "-8") == 0)
     {
 #ifdef SUPPORT_PCRE2_8
     test_mode = PCRE8_MODE;
-    (void)pcre2_set_bsr_8(pat_context8, 999);
-    (void)pcre2_set_newline_8(pat_context8, 999);
+    // XXX
+    // (void)pcre2_set_bsr_8(pat_context8, 999);
+    // (void)pcre2_set_newline_8(pat_context8, 999);
 #else
     fprintf(stderr,
       "** This version of PCRE2 was built without 8-bit support\n");
@@ -4051,9 +3791,10 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
     {
 #ifdef SUPPORT_PCRE2_16
     test_mode = PCRE16_MODE;
-    (void)pcre2_config_16(PCRE2_CONFIG_VERSION, NULL);
-    (void)pcre2_set_bsr_16(pat_context16, 999);
-    (void)pcre2_set_newline_16(pat_context16, 999);
+    // XXX
+    // (void)pcre2_config_16(PCRE2_CONFIG_VERSION, NULL);
+    // (void)pcre2_set_bsr_16(pat_context16, 999);
+    // (void)pcre2_set_newline_16(pat_context16, 999);
 #else
     fprintf(stderr,
       "** This version of PCRE2 was built without 16-bit support\n");
@@ -4065,9 +3806,10 @@ while (argc > 1 && argv[op][0] == '-' && argv[op][1] != 0)
     {
 #ifdef SUPPORT_PCRE2_32
     test_mode = PCRE32_MODE;
-    (void)pcre2_config_32(PCRE2_CONFIG_VERSION, NULL);
-    (void)pcre2_set_bsr_32(pat_context32, 999);
-    (void)pcre2_set_newline_32(pat_context32, 999);
+    // XXX
+    // (void)pcre2_config_32(PCRE2_CONFIG_VERSION, NULL);
+    // (void)pcre2_set_bsr_32(pat_context32, 999);
+    // (void)pcre2_set_newline_32(pat_context32, 999);
 #else
     fprintf(stderr,
       "** This version of PCRE2 was built without 32-bit support\n");
@@ -4254,43 +3996,9 @@ We wait to do this until we know which mode we are in. */
 
 if (arg_error != NULL)
   {
-  int len;
   int errcode;
   char *endptr;
   long li;
-
-/* Ensure the relevant non-8-bit buffer is available. Ensure that it is at
-least 128 code units, because it is used for retrieving error messages. */
-
-#ifdef SUPPORT_PCRE2_16
-  if (test_mode == PCRE16_MODE)
-    {
-    pbuffer16_size = 256;
-    pbuffer16 = (uint16_t *)malloc(pbuffer16_size);
-    if (pbuffer16 == NULL)
-      {
-      fprintf(stderr, "pcre2test: malloc(%" SIZ_FORM ") failed for pbuffer16\n",
-        pbuffer16_size);
-      yield = 1;
-      goto EXIT;
-      }
-    }
-#endif
-
-#ifdef SUPPORT_PCRE2_32
-  if (test_mode == PCRE32_MODE)
-    {
-    pbuffer32_size = 512;
-    pbuffer32 = (uint32_t *)malloc(pbuffer32_size);
-    if (pbuffer32 == NULL)
-      {
-      fprintf(stderr, "pcre2test: malloc(%" SIZ_FORM ") failed for pbuffer32\n",
-        pbuffer32_size);
-      yield = 1;
-      goto EXIT;
-      }
-    }
-#endif
 
   /* Loop along a list of error numbers. */
 
@@ -4305,29 +4013,7 @@ least 128 code units, because it is used for retrieving error messages. */
       }
     errcode = (int)li;
     printf("Error %d: ", errcode);
-    PCRE2_GET_ERROR_MESSAGE(len, errcode);
-    if (len < 0)
-      {
-      switch (len)
-        {
-        case PCRE2_ERROR_BADDATA:
-        printf("PCRE2_ERROR_BADDATA (unknown error number)");
-        break;
-
-        case PCRE2_ERROR_NOMEMORY:
-        printf("PCRE2_ERROR_NOMEMORY (buffer too small)");
-        break;
-
-        default:
-        printf("Unexpected return (%d) from pcre2_get_error_message()", len);
-        break;
-        }
-      }
-    else
-      {
-      PCHARSV(errorbuffer, 0, len, FALSE, stdout);
-      }
-    printf("\n");
+    print_error_message_file(stdout, errcode, "", "\n", TRUE);
     if (*endptr == 0) goto EXIT;
     arg_error = endptr + 1;
     }
@@ -4339,67 +4025,20 @@ least 128 code units, because it is used for retrieving error messages. */
 running in. Exercise the general context copying and match data size functions,
 which are not otherwise used. */
 
-code_unit_size = test_mode/8;
 max_oveccount = DEFAULT_OVECCOUNT;
 
-/* Use macros to save a lot of duplication. */
+  // XXX
+// #define CONTEXTTESTS \
+//   (void)G(pcre2_set_compile_extra_options_,BITS)(G(pat_context,BITS), 0); \
+//   (void)G(pcre2_set_max_pattern_length_,BITS)(G(pat_context,BITS), 0); \
+//   (void)G(pcre2_set_max_pattern_compiled_length_,BITS)(G(pat_context,BITS), 0); \
+//   (void)G(pcre2_set_max_varlookbehind_,BITS)(G(pat_context,BITS), 0); \
+//   (void)G(pcre2_set_offset_limit_,BITS)(G(dat_context,BITS), 0); \
+//   (void)G(pcre2_get_match_data_size_,BITS)(G(match_data,BITS))
 
-#define CREATECONTEXTS \
-  G(general_context,BITS) = G(pcre2_general_context_create_,BITS)(&my_malloc, &my_free, NULL); \
-  G(general_context_copy,BITS) = G(pcre2_general_context_copy_,BITS)(G(general_context,BITS)); \
-  G(default_pat_context,BITS) = G(pcre2_compile_context_create_,BITS)(G(general_context,BITS)); \
-  G(pat_context,BITS) = G(pcre2_compile_context_copy_,BITS)(G(default_pat_context,BITS)); \
-  G(default_dat_context,BITS) = G(pcre2_match_context_create_,BITS)(G(general_context,BITS)); \
-  G(dat_context,BITS) = G(pcre2_match_context_copy_,BITS)(G(default_dat_context,BITS)); \
-  G(default_con_context,BITS) = G(pcre2_convert_context_create_,BITS)(G(general_context,BITS)); \
-  G(con_context,BITS) = G(pcre2_convert_context_copy_,BITS)(G(default_con_context,BITS)); \
-  G(match_data,BITS) = G(pcre2_match_data_create_,BITS)(max_oveccount, G(general_context,BITS))
+/* Initialise the globals for the current mode. */
 
-#define CONTEXTTESTS \
-  (void)G(pcre2_set_compile_extra_options_,BITS)(G(pat_context,BITS), 0); \
-  (void)G(pcre2_set_max_pattern_length_,BITS)(G(pat_context,BITS), 0); \
-  (void)G(pcre2_set_max_pattern_compiled_length_,BITS)(G(pat_context,BITS), 0); \
-  (void)G(pcre2_set_max_varlookbehind_,BITS)(G(pat_context,BITS), 0); \
-  (void)G(pcre2_set_offset_limit_,BITS)(G(dat_context,BITS), 0); \
-  (void)G(pcre2_get_match_data_size_,BITS)(G(match_data,BITS))
-
-/* Call the appropriate functions for the current mode, and exercise some
-functions that are not otherwise called. */
-
-#ifdef SUPPORT_PCRE2_8
-#undef BITS
-#define BITS 8
-if (test_mode == PCRE8_MODE)
-  {
-  CREATECONTEXTS;
-  CONTEXTTESTS;
-  }
-#endif
-
-#ifdef SUPPORT_PCRE2_16
-#undef BITS
-#define BITS 16
-if (test_mode == PCRE16_MODE)
-  {
-  CREATECONTEXTS;
-  CONTEXTTESTS;
-  }
-#endif
-
-#ifdef SUPPORT_PCRE2_32
-#undef BITS
-#define BITS 32
-if (test_mode == PCRE32_MODE)
-  {
-  CREATECONTEXTS;
-  CONTEXTTESTS;
-  }
-#endif
-
-/* Set a default parentheses nest limit that is large enough to run the
-standard tests (this also exercises the function). */
-
-PCRE2_SET_PARENS_NEST_LIMIT(default_pat_context, PARENS_NEST_DEFAULT);
+init_globals();
 
 /* Handle command line modifier settings, sending any error messages to
 stderr. We need to know the mode before modifying the context, and it is tidier
@@ -4450,8 +4089,6 @@ if (argc > 2)
 
 if (!quiet) print_version(outfile, TRUE);
 
-SET(compiled_code, NULL);
-
 #ifdef SUPPORT_PCRE2_8
 preg.re_pcre2_code = NULL;
 preg.re_match_data = NULL;
@@ -4461,7 +4098,7 @@ while (notdone)
   {
   uint8_t *p;
   int rc = PR_OK;
-  BOOL expectdata = TEST(compiled_code, !=, NULL);
+  BOOL expectdata = have_active_pattern();
 #ifdef SUPPORT_PCRE2_8
   expectdata |= preg.re_pcre2_code != NULL;
 #endif
@@ -4503,11 +4140,7 @@ while (notdone)
         preg.re_match_data = NULL;
         }
 #endif  /* SUPPORT_PCRE2_8 */
-      if (TEST(compiled_code, !=, NULL))
-        {
-        SUB1(pcre2_code_free, compiled_code);
-        SET(compiled_code, NULL);
-        }
+      free_active_pattern();
       skipping = FALSE;
       setlocale(LC_CTYPE, "C");
       }
@@ -4597,8 +4230,10 @@ EXIT:
 if (infile != NULL && INTERACTIVE(infile)) clear_history();
 #endif
 
-if (infile != NULL && infile != stdin) fclose(infile);
-if (outfile != NULL && outfile != stdout) fclose(outfile);
+if (infile != NULL && infile != stdin) { fclose(infile); infile = NULL; }
+if (outfile != NULL && outfile != stdout) { fclose(outfile); outfile = NULL; }
+
+// XXX lots of freeing to do here via _inc.h
 
 free(buffer);
 free(dbuffer);

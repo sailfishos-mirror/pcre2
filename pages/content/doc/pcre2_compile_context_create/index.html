@@ -1,0 +1,32 @@
++++
+title = "pcre2_compile_context_create"
+aliases = ["/doc/html/pcre2_compile_context_create.html"]
++++
+
+<h2>
+SYNOPSIS
+</h2>
+<p>
+<b>#include &#60;pcre2.h&#62;</b>
+</p>
+<p>
+<b>pcre2_compile_context *pcre2_compile_context_create(</b><br>
+
+<b>  pcre2_general_context *<i>gcontext</i>);</b><br>
+
+</p>
+<h2>
+DESCRIPTION
+</h2>
+<p>
+This function creates and initializes a new compile context. If its argument is
+NULL, <b>malloc()</b> is used to get the necessary memory; otherwise the memory
+allocation function within the general context is used. The result is NULL if
+the memory could not be obtained.
+</p>
+<p>
+There is a complete description of the PCRE2 native API in the
+<a href="../pcre2api/"><b>pcre2api</b></a>
+page and a description of the POSIX API in the
+<a href="../pcre2posix/"><b>pcre2posix</b></a>
+page.

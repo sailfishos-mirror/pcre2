@@ -1,0 +1,34 @@
++++
+title = "pcre2_maketables_free"
+aliases = ["/doc/html/pcre2_maketables_free.html"]
++++
+
+<h2>
+SYNOPSIS
+</h2>
+<p>
+<b>#include &#60;pcre2.h&#62;</b>
+</p>
+<p>
+<b>void pcre2_maketables_free(pcre2_general_context *<i>gcontext</i>,</b><br>
+
+<b>  const uint8_t *<i>tables</i>);</b><br>
+
+</p>
+<h2>
+DESCRIPTION
+</h2>
+<p>
+This function discards a set of character tables that were created by a call
+to
+<a href="../pcre2_maketables/"><b>pcre2_maketables()</b>.</a>
+</p>
+<p>
+The <i>gcontext</i> parameter should match what was used in that call to
+account for any custom allocators that might be in use; if it is NULL
+the system <b>free()</b> is used.
+</p>
+<p>
+There is a complete description of the PCRE2 native API in the
+<a href="../pcre2api/"><b>pcre2api</b></a>
+page.

@@ -1,0 +1,31 @@
++++
+title = "pcre2_code_free"
+aliases = ["/doc/html/pcre2_code_free.html"]
++++
+
+<h2>
+SYNOPSIS
+</h2>
+<p>
+<b>#include &#60;pcre2.h&#62;</b>
+</p>
+<p>
+<b>void pcre2_code_free(pcre2_code *<i>code</i>);</b><br>
+
+</p>
+<h2>
+DESCRIPTION
+</h2>
+<p>
+If <i>code</i> is NULL, this function does nothing. Otherwise, <i>code</i> must
+point to a compiled pattern. This function frees its memory, including any
+memory used by the JIT compiler. If the compiled pattern was created by a call
+to <b>pcre2_code_copy_with_tables()</b>, the memory for the character tables is
+also freed.
+</p>
+<p>
+There is a complete description of the PCRE2 native API in the
+<a href="../pcre2api/"><b>pcre2api</b></a>
+page and a description of the POSIX API in the
+<a href="../pcre2posix/"><b>pcre2posix</b></a>
+page.

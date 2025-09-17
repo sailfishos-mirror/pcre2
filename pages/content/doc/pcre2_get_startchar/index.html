@@ -1,0 +1,33 @@
++++
+title = "pcre2_get_startchar"
+aliases = ["/doc/html/pcre2_get_startchar.html"]
++++
+
+<h2>
+SYNOPSIS
+</h2>
+<p>
+<b>#include &#60;pcre2.h&#62;</b>
+</p>
+<p>
+<b>PCRE2_SIZE pcre2_get_startchar(pcre2_match_data *<i>match_data</i>);</b><br>
+
+</p>
+<h2>
+DESCRIPTION
+</h2>
+<p>
+After a successful call of <b>pcre2_match()</b> that was passed the match block
+that is this function's argument, this function returns the code unit offset of
+the character at which the successful match started. For a non-partial match,
+this can be different to the value of <i>ovector[0]</i> if the pattern contains
+the \K escape sequence. After a partial match, however, this value is always
+the same as <i>ovector[0]</i> because \K does not affect the result of a
+partial match.
+</p>
+<p>
+There is a complete description of the PCRE2 native API in the
+<a href="../pcre2api/"><b>pcre2api</b></a>
+page and a description of the POSIX API in the
+<a href="../pcre2posix/"><b>pcre2posix</b></a>
+page.

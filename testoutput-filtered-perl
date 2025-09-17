@@ -1,0 +1,238 @@
+Perl v5.38.2
+/(?X)abdef/
+Failed: error XXX at offset 3: XXX
+
+/(?z)abc/
+Failed: error XXX at offset 3: XXX
+
+/(ab\2)/
+Failed: error XXX at offset 5: XXX
+
+/(a)|\2/
+Failed: error XXX at offset 6: XXX
+
+/(a)|\99/
+Failed: error XXX at offset 7: XXX
+
+# OK, need to think about this one - *probably* no action
+/x{5,4}/
+
+/[z-a]/
+Failed: error XXX at offset 4: XXX
+
+/[\200-\110]/
+Failed: error XXX at offset 10: XXX
+
+/a+?+/
+Failed: error XXX at offset 4: XXX
+
+/a+?+/
+Failed: error XXX at offset 4: XXX
+
+/a{2,3}?+b/
+Failed: error XXX at offset 8: XXX
+
+# TODO fix unterminated char class
+/[[:space:]/
+Failed: error XXX at offset 1: XXX
+
+# I think this divergence is OK
+/(?1)/
+Failed: error XXX at offset 4: XXX
+
+# I think this divergence is OK
+/(?99)/
+Failed: error XXX at offset 5: XXX
+
+# Hmm, we are eager on the error for this one.
+/(?:(?(2y)a|b)(X))+/
+Failed: error XXX at offset 8: XXX
+
+/(?P'abc'x)(?P<xyz>y)/
+Failed: error XXX at offset 4: XXX
+
+/(?(''))/
+Failed: error XXX at offset 5: XXX
+
+/(?('R')stuff)/
+Failed: error XXX at offset 5: XXX
+
+/(?<A> (?'B' abc (?(R) (?(R&C)1) (?(R&B)2) X  |  (?1)  (?2)   (?R) ))) /x
+Failed: error XXX at offset 28: XXX
+
+# our 8 is good
+/^(a)\g-2/
+Failed: error XXX at offset 7: XXX
+
+# IGNORE This should be offset 8; HARD(ish)
+/^(a)\g{0}/
+Failed: error XXX at offset 7: XXX
+
+/^(a)\g{3/
+Failed: error XXX at offset 8: XXX
+
+/^(a)\g<3/
+Failed: error XXX at offset 6: XXX
+
+/^(a)\g'3/
+Failed: error XXX at offset 6: XXX
+
+/^(a)\k{a/
+Failed: error XXX at offset 8: XXX
+
+/^(a)\k<a/
+Failed: error XXX at offset 8: XXX
+
+/^(a)\k'a/
+Failed: error XXX at offset 8: XXX
+
+/^(a)\g{aa}/
+Failed: error XXX at offset 9: XXX
+
+# This divergence is OK
+/x(?-1)y/
+Failed: error XXX at offset 6: XXX
+
+# All good at 12
+/\g6666666666/
+Failed: error XXX at offset 2: XXX
+
+# Also good at 3
+/(?1)\c[/
+Failed: error XXX at offset 4: XXX
+
+# I prefer 5, this is OK
+/a(*CR)b/
+Failed: error XXX at offset 6: XXX
+
+# I think 9 is OK
+/(?<a>)(?&)/
+Failed: error XXX at offset 10: XXX
+
+/(?<a>)(?&aaaaaaaaaaaaaaaaaaaaaaa)/
+Failed: error XXX at offset 32: XXX
+
+/(?+-a)/
+Failed: error XXX at offset 4: XXX
+
+/\k<>/
+Failed: error XXX at offset 4: XXX
+
+/(?P=)/
+Failed: error XXX at offset 5: XXX
+
+# I prefer our 4
+/(?P>)/
+Failed: error XXX at offset 5: XXX
+
+# XXX surely this is inconsistent with other conditions?
+/^(?(DEFINE) abc | xyz ) /x
+Failed: error XXX at offset 18: XXX
+
+/)/
+Failed: error XXX at offset 1: XXX
+
+# Our 2 is better
+/(*)b/
+Failed: error XXX at offset 3: XXX
+
+# Accept this
+/(a)(?(1)a|b|c)/
+Failed: error XXX at offset 12: XXX
+
+# And this
+/(?(?=a)a|b|c)/
+Failed: error XXX at offset 11: XXX
+
+/*a/
+Failed: error XXX at offset 1: XXX
+
+/a**/
+Failed: error XXX at offset 3: XXX
+
+/(?<%)b/
+Failed: error XXX at offset 4: XXX
+
+# TODO another missing terminating
+/[a[:xyz:/
+Failed: error XXX at offset 1: XXX
+
+# TODO missing closing paren?
+/(abc/
+Failed: error XXX at offset 1: XXX
+
+/[\R]/
+
+/[\z]/
+
+# Accept
+/(?<=ab(c+)d)ef/
+Error: Lookbehind longer than 255 not implemented in regex m/(?<=ab(c+)d)ef/ at (eval 51) line 1, <INFILE> line 121.
+
+# our 4 is good
+/(?(1?)a|b)/
+Failed: error XXX at offset 5: XXX
+
+/[:x:]/
+
+# XXX hmm, should be 5
+/(?(10))/
+
+# Fine, I don't care
+/^\cé/
+Failed: error XXX at offset 4: XXX
+
+# Accept
+/(?<=(abc)+)X/
+Error: Lookbehind longer than 255 not implemented in regex m/(?<=(abc)+)X/ at (eval 56) line 1, <INFILE> line 135.
+
+# XXX consider
+/(?<0abc>xx)/
+Failed: error XXX at offset 4: XXX
+
+# XXX also consider
+/\k<5ghj>/
+Failed: error XXX at offset 4: XXX
+
+/\k{2fgh}/
+Failed: error XXX at offset 4: XXX
+
+/\k'2fgh'/
+Failed: error XXX at offset 4: XXX
+
+/(?&1abc)xx(?<1abc>y)/
+Failed: error XXX at offset 4: XXX
+
+# I reckon this is OK
+/(?R-:(?</
+Error: Sequence (?R) not terminated in regex m/(?R-:(?</ at (eval 62) line 1, <INFILE> line 150.
+
+/abcd/max_pattern_length=3
+Error: Unknown regexp modifier "/_" at (eval 63) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 63) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 63) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 63) line 1, at end of line
+Unknown regexp modifier "/r" at (eval 63) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 63) line 1, at end of line
+Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 63) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 63) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 63) line 1, at end of line
+Unknown regexp modifier "/h" at (eval 63) line 1, at end of line
+(eval 63) has too many errors.
+
+/(abcdefg){10}hijklmnop/max_pattern_compiled_length=100
+Error: Unknown regexp modifier "/_" at (eval 64) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 64) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 64) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 64) line 1, at end of line
+Unknown regexp modifier "/r" at (eval 64) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 64) line 1, at end of line
+Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 64) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 64) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 64) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 64) line 1, at end of line
+(eval 64) has too many errors.
+
+# XXX not good!
+/(?=a\Kb)ab/
+Failed: error XXX at offset 6: XXX

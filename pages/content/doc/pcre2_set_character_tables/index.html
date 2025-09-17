@@ -1,0 +1,35 @@
++++
+title = "pcre2_set_character_tables"
+aliases = ["/doc/html/pcre2_set_character_tables.html"]
++++
+
+<h2>
+SYNOPSIS
+</h2>
+<p>
+<b>#include &#60;pcre2.h&#62;</b>
+</p>
+<p>
+<b>int pcre2_set_character_tables(pcre2_compile_context *<i>ccontext</i>,</b><br>
+
+<b>  const uint8_t *<i>tables</i>);</b><br>
+
+</p>
+<h2>
+DESCRIPTION
+</h2>
+<p>
+This function sets a pointer to custom character tables within a compile
+context. The second argument must point to a set of PCRE2 character tables or
+be NULL to request the default tables. The result is always zero. Character
+tables can be created by calling <b>pcre2_maketables()</b> or by running the
+<b>pcre2_dftables</b> maintenance command in binary mode (see the
+<a href="../pcre2build/"><b>pcre2build</b></a>
+documentation).
+</p>
+<p>
+There is a complete description of the PCRE2 native API in the
+<a href="../pcre2api/"><b>pcre2api</b></a>
+page and a description of the POSIX API in the
+<a href="../pcre2posix/"><b>pcre2posix</b></a>
+page.

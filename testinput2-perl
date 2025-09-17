@@ -1,0 +1,3259 @@
+# This set of tests is not Perl-compatible. It checks on special features
+# of PCRE2's API, error diagnostics, and the compiled code of some patterns.
+# It also checks the non-Perl syntax that PCRE2 supports (Python, .NET,
+# Oniguruma). There are also some tests where PCRE2 and Perl differ,
+# either because PCRE2 can't be compatible, or there is a possible Perl
+# bug.
+
+# NOTE: This is a non-UTF set of tests. When UTF support is needed, use
+# test 5.
+
+#forbid_utf
+#newline_default lf any anycrlf
+
+# Test binary zeroes in the pattern
+
+# /a\0B/ where 0 is a binary zero
+
+# /a0b/ where 0 is a binary zero
+
+# /(?#B0C)DE/ where 0 is a binary zero
+
+
+
+
+
+
+
+
+
+/ab\idef/
+
+/(?X)ab\idef/
+
+/x{5,4}/
+
+/z{65536}/
+
+/[abcd/
+
+/[\B]/B
+
+/[\R]/B
+
+/[\X]/B
+
+/[z-a]/
+
+/^*/
+
+/(abc/
+
+/(?# abc/
+
+/(?z)abc/
+
+
+
+
+
+
+
+
+
+/(ab\2)/
+
+/{4,5}abc/
+
+
+
+
+/(a)(b)(c)(d)(e)\6/
+
+
+
+/ab(?z)cd/
+
+
+
+/)/
+
+/a[]b/
+
+
+
+
+
+
+
+
+
+
+/abc(?<=a+)b/
+
+
+
+
+
+
+
+
+
+
+
+
+/(a)(?(1)a|b|c)/
+
+/(?(?=a)a|b|c)/
+
+/(?(1a)/
+
+/(?(1a))/
+
+/(?(?i))/
+
+/(?(abc))/
+
+/(?(?<ab))/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/(?<=ab(c+)d)ef/
+
+/(?<=ab(?<=c+)d)ef/
+
+
+
+
+
+
+
+# Perl does not fail these two for the final subjects.
+
+
+
+# These are syntax tests from Perl 5.005
+
+/a[b-a]/
+
+/a[]b/
+
+/a[/
+
+/*a/
+
+/(*)b/
+
+/abc)/
+
+/(abc/
+
+/a**/
+
+/)(/
+
+/\1/
+
+/\2/
+
+/(a)|\2/
+
+/a[b-a]/Ii
+
+/a[]b/Ii
+
+/a[/Ii
+
+/*a/Ii
+
+/(*)b/Ii
+
+/abc)/Ii
+
+/(abc/Ii
+
+/a**/Ii
+
+/)(/Ii
+
+/:(?:/
+
+/(?<%)b/
+
+/a(?{)b/
+
+/a(?{{})b/
+
+/a(?{}})b/
+
+/a(?{"{"})b/
+
+/a(?{"{"}})b/
+
+/(?(1?)a|b)/
+
+/[a[:xyz:/
+
+/(?<=x+)y/
+
+/a{37,17}/
+
+/abc/\
+
+/abc/\i
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/[[.ch.]]/I
+
+/[[=ch=]]/I
+
+/[[:rhubarb:]]/I
+
+
+
+
+/[\200-\110]/I
+
+/^(?(0)f|b)oo/I
+
+# This one's here because of the large output vector needed
+
+
+# This one's here because Perl does this differently and PCRE2 can't at present
+
+
+# These are all cases where Perl does it differently (nested captures)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ----------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+         
+
+
+
+
+
+
+
+# For comparison with the following test, which disables auto-possessification
+# In this regex, x+ should be converted to x++
+
+# In this regex, x+ should not be converted to x++
+
+# Also in this regex, x+ should not be converted to x++
+
+# In this one too, x+ should not be converted to x++
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/a+?+/I
+
+/a{2,3}?+b/I
+
+/(?U)a+?+/I
+
+/a{2,3}?+b/I,ungreedy
+
+
+
+
+
+
+/[.x.]/I
+
+/[=x=]/I
+
+/[:x:]/I
+
+/\F/I
+
+/\l/I
+
+/\L/I
+
+/\N{name}/I
+
+/\u/I
+
+/\U/I
+
+
+/\N{,}/
+
+/\N{25,ab}/
+
+/[\N]/
+
+/[\N{4}]/
+
+/[\N{name}]/
+
+
+/[/I
+
+/[a-/I
+
+/[[:space:]/I
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/(?C256)ab/I
+
+/(?Cab)xx/I
+
+/(?C12vr)x/I
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/(?1)/I
+
+/((?2)(abc)/I
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/(?P<x>eks)(?P<x>eccs)/I
+
+/(?P<abc>abc(?P<def>def)(?P<abc>xyz))/I
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/a{11111111111111111111}/I
+
+/(){64294967295}/I
+
+/(){2,4294967295}/I
+
+
+
+
+
+
+
+
+
+
+
+
+/^((?P<A>a1)|(?P<A>a2)b)/I
+
+
+
+
+
+
+
+
+
+
+
+/^(?P<A>a) (?J:(?P<B>b)(?P<B>c)) (?P<A>d)/I
+
+# In this next test, J is not set at the outer level; consequently it isn't set
+# in the pattern's options; consequently pcre2_substring_get_byname() produces
+# a random value.
+
+
+
+
+/(?:(?(2y)a|b)(X))+/I
+
+/(?:(?(ZA)a|b)(?P<ZZ>X))+/I
+
+
+
+/(?P<ABC/I
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/(?<abc'x)(?'xyz'y)/I
+
+/(?<abc>x)(?'xyz>y)/I
+
+/(?P'abc'x)(?P<xyz>y)/I
+
+
+/^(?P>abc)(?<abcd>xxx)/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/(?(<bc))/
+
+/(?(''))/
+
+/(?('R')stuff)/
+
+
+
+/(?<A> (?'B' abc (?(R) (?(R&C)1) (?(R&B)2) X  |  (?1)  (?2)   (?R) ))) /x
+
+/^(?(DEFINE) abc | xyz ) /x
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/^(a)\g-2/
+
+/^(a)\g/
+
+/^(a)\g{0}/
+
+/^(a)\g{3/
+
+/^(a)\g{aa}/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/x(?-0)y/
+
+/x(?-1)y/
+
+/x(?+0)y/
+
+/x(?+1)y/
+
+
+
+/(?(-1)a)/B
+
+
+/((?(-2)a))/B
+
+
+
+/\g{A/
+
+
+
+
+
+
+
+
+
+#if !ebcdic
+
+
+#endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/[\E]AAA/
+
+/[\Q\E]AAA/
+
+/[^\E]AAA/
+
+/[^\Q\E]AAA/
+
+/[\E^]AAA/
+
+/[\Q\E^]AAA/
+
+
+
+
+
+
+
+
+/a(*MARK)b/
+
+/\g6666666666/
+
+
+/(?1)\c[/
+
+
+
+
+
+/a(*CR)b/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/(?<a>)(?&)/
+
+/(?<abc>)(?&a)/
+
+/(?<a>)(?&aaaaaaaaaaaaaaaaaaaaaaa)/
+
+/(?+-a)/
+
+/(?-+a)/
+
+/(?(-1))/
+
+/(?(+10))/
+
+/(?(10))/
+
+
+
+/\k''/
+
+/\k<>/
+
+/\k{}/
+
+/\k/
+
+/\kabc/
+
+/(?P=)/
+
+/(?P>)/
+
+/[[:foo:]]/
+
+/[[:1234:]]/
+
+/[[:f\oo:]]/
+
+/[[: :]]/
+
+/[[:...:]]/
+
+/[[:l\ower:]]/
+
+/[[:abc\:]]/
+
+/[abc[:x\]pqr:]]/
+
+/[[:a\dz:]]/
+
+/(^(a|b\g<-1'c))/
+
+
+
+
+
+
+
+/(?2)[]a()b](abc)/
+    abcbabc
+
+/(?2)[^]a()b](abc)/
+    abcbabc
+
+
+
+
+/(?&N)[]a(?<N>)](?<M>abc)/
+   abc<abc
+
+/(?&N)[]a(?<N>)](abc)/
+   abc<abc
+
+/a[]b/
+
+/a[^]b/
+
+
+
+
+
+
+
+
+/a(*FAIL)+b/
+
+
+
+
+
+
+
+
+
+
+
+
+/^X(?5)(a)(?|(b)|(q))(c)(d)Y/
+    XYabcdY
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/(a)(?<=b+(?1))/
+
+/(a+)(?<=b(?1))/
+
+/(a(?<=b(?1)))/
+
+/(?<=b(?1))xyz/
+
+/(?<=b(?1))xyz(b+)pqrstuvew/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                 # quote, otherwise match up to next space
+
+
+
+/(?|(?<a>A)|(?<b>B))/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# This one is here because Perl gives the match as "b" rather than "ab". I
+# believe this to be a Perl bug.
+
+
+
+/abc(*MARK:)pqr/
+
+/abc(*:)pqr/
+
+
+# This should, and does, fail. In Perl, it does not, which I think is a
+# bug because replacing the B in the pattern by (B|D) does make it fail.
+# Turning off Perl's optimization by inserting (??{""}) also makes it fail.
+
+
+# These should be different, but in Perl they are not, which I think
+# is a bug in Perl.
+
+
+
+# Mark names can be duplicated. Perl doesn't give a mark for this one,
+# though PCRE2 does.
+
+
+# COMMIT at the start of a pattern should be the same as an anchor. Perl
+# optimizations defeat this. So does the PCRE2 optimization unless we disable
+# it.
+
+
+
+
+
+
+# Perl gets some of these wrong
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#if !ebcdic
+
+/^\cģ/
+
+#endif
+
+
+
+/(?P<abn>(?P=abn)(?<badstufxxx)/B
+
+/(?P<abn>(?P=axn)xxx)/B
+
+
+# These tests are here because Perl gets the first one wrong.
+
+
+
+
+# -------------
+
+
+
+
+
+
+
+/(?<=(abc)+)X/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Perl doesn't get these right IMO (the 3rd is PCRE2-specific)
+
+
+
+
+
+
+
+
+
+
+
+
+# These are here because they are not Perl-compatible; the studying means the
+# mark is not seen.
+
+
+
+# ----------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#if !ebcdic
+
+
+
+
+
+
+
+    
+
+
+#endif
+
+
+
+
+
+
+
+/a[\NB]c/
+    aNc
+
+/a[B-\Nc]/
+
+/a[B\Nc]/
+
+
+
+# This test, with something more complicated than individual letters, causes
+# different behaviour in Perl. Perhaps it disables some optimization; no tag is
+# passed back for the failures, whereas in PCRE2 there is a tag.
+
+
+# Perl doesn't give marks for these, though it does if the alternatives are
+# replaced by single letters.
+
+
+
+# After a partial match, the behaviour is as for a failure.
+
+
+# These are here because Perl doesn't return a mark, except for the first.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# These are all run as real matches in test 1; here we are just checking the
+# settings of the anchored and startline bits.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Perl seems to have a bug with this one.
+
+
+# Here are some that Perl treats differently because of the way it handles
+# backtracking verbs.
+
+
+
+
+
+
+
+
+
+
+
+
+
+# This test causes a segfault with Perl 5.18.0
+
+
+
+
+
+
+# A complete set of tests for auto-possessification of character types, but
+# omitting \C because it might be disabled (it has its own tests).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        #
+        #
+        #
+        #
+
+        #
+
+
+
+
+
+
+
+
+
+
+
+
+        #
+
+        #
+        #
+        #
+        #
+        #
+        #
+        #
+        #
+
+
+
+        #
+        #
+
+
+
+
+
+
+# End of special auto-possessive tests
+
+/^A\o{1239}B/
+    A\123B
+
+/^A\oB/
+
+/^A\x{zz}B/
+
+/^A\x{12Z/
+
+/^A\x{/
+
+
+
+
+
+/[a-[:digit:]]+/
+
+/[A-[:digit:]]+/
+
+/[a-[.xxx.]]+/
+
+/[a-[=xxx=]]+/
+
+#if !ebcdic
+
+/[a-[!xxx!]]+/
+
+
+#endif
+
+/[a-\d]+/
+
+/(?<0abc>xx)/
+
+/(?&1abc)xx(?<1abc>y)/
+
+/(?<ab-cd>xx)/
+
+/(?'0abc'xx)/
+
+/(?P<0abc>xx)/
+
+/\k<5ghj>/
+
+/\k'5ghj'/
+
+/\k{2fgh}/
+
+/(?P=8yuki)/
+
+/\g{4df}/
+
+/(?&1abc)xx(?<1abc>y)/
+
+/(?P>1abc)xx(?<1abc>y)/
+
+/\g'3gh'/
+
+/\g<5fg>/
+
+/(?(<4gh>)abc)/
+
+/(?('4gh')abc)/
+
+/(?(4gh)abc)/
+
+/(?(R&6yh)abc)/
+
+
+# Test the ugly "start or end of word" compatibility syntax.
+
+
+
+/[a[:<:]] should give error/
+
+
+
+# Test stack guard external calls.
+
+/(((a)))/stackguard=1
+
+/(((a)))/stackguard=2
+
+
+
+# End stack guard tests
+
+
+/\othing/
+
+/\o{}/
+
+/\o{whatever}/
+
+/\xthing/
+
+/^A\xZ/
+
+/^A\x/
+
+/\x{}/
+
+/\x{whatever}/
+
+/A\8B/
+
+/A\9B/
+
+# This one is here because Perl fails to match "12" for this pattern when the $
+# is present.
+
+
+# Perl gets this one wrong, giving "a" as the after text for ca and failing to
+# match for cd.
+
+
+# This should test both paths for processing OP_RECURSE.
+
+
+
+
+
+
+
+
+
+
+/(?(VERSION<10)yes|no)/
+
+/(?(VERSION>10)yes|no)/
+
+/(?(VERSION>=10.0.0)yes|no)/
+
+/(?(VERSION=10.101)yes|no)/
+
+# We should see the starting code unit, required code unit, and minimum length set for this regex:
+
+# None of the following three should have the starting code unit, required code unit, and minimum length set:
+
+
+
+
+
+
+/(((((a)))))/parens_nest_limit=2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#if !ebcdic
+
+
+#endif
+
+
+
+
+
+
+
+
+
+
+
+# For comparison with the following tests, which disable automatic dotstar anchoring
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Quantifiers are not allowed on condition assertions, but are otherwise
+# OK in conditions.
+
+/(?(?=0)?)+/
+
+
+
+
+
+# These two pattern showeds up compile-time bugs
+
+
+
+# Callouts with string arguments
+
+/a(?C"/
+
+/a(?C"a/
+
+/a(?C"a"/
+
+/a(?C"a"bcde(?C"b")xyz/
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Binary zero in callout string
+#  a  (  ?  C  '  x     z  '  )  b
+
+
+
+# JIT gives a different error message for the infinite recursion
+
+
+# Perl fails to diagnose the absence of an assertion
+
+"(?(?<E>.*!.*)?)"
+
+
+
+/(?<=\bABQ(3(?-7)))/
+
+/(?<=\bABQ(3(?+7)))/
+
+";(?<=()((?3))((?2)))"
+
+# Perl loops on this (PCRE2 used to!)
+
+# duplicate matches
+
+
+# overlapping matches
+
+# not-sorted matches
+
+# CRLF cases
+
+
+
+
+
+
+
+
+
+
+
+
+/((((((((x))))))))\81/
+    xx1
+
+
+/\80/
+
+/A\8B\9C/
+    A8B9C
+
+
+
+# These are some patterns that used to cause buffer overflows or other errors
+# while compiling.
+
+
+
+/(\9*+(?2);\3++()2|)++{/
+
+/\V\x85\9*+((?2)\3++()2)*:2/
+
+
+
+
+
+"(?=!((?2)(?))({8(?<=(?1){29}8bbbb\x16\xd\xc6^($(\xa9H4){4}h}?1)B))\x15')"
+
+/A(?'')Z/
+
+
+/(?<=|(\,\$(?73591620449005828816)\xa8.{7}){6}\x09)/
+
+
+/[[:>:]](?<)/
+
+/((?x)(*:0))#(?'/
+
+/(?C$[$)(?<]/
+
+/(?C$)$)(?<]/
+
+
+/((?x)(?#))#(?'/
+
+
+/[[:\\](?<[::]/
+
+
+"[[[.\xe8Nq\xffq\xff\xe0\x2|||::Nq\xffq\xff\xe0\x6\x2|||::[[[:[::::::[[[[[::::::::[:[[[:[:::[[[[[[[[[[[[:::::::::::::::::[[.\xe8Nq\xffq\xff\xe0\x2|||::Nq\xffq\xff\xe0\x6\x2|||::[[[:[::::::[[[[[::::::::[:[[[:[:::[[[[[[[[[[[[[[:::E[[[:[:[[:[:::[[:::E[[[:[:[[:'[:::::E[[[:[::::::[[[:[[[[[[[::E[[[:[::::::[[[:[[[[[[[[:[[::[::::[[:::::::[[:[[[[[[[:[[::[:[[:[~"
+
+
+/(?R-:(?</
+
+/(?R-:(?<)/
+
+/(?(?C{\Q})(?!(?'/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/(?(8000000000/
+
+/((?(R8000000000)))/
+
+
+/(?(1)()\983040\2)/
+
+/(*LIMIT_MATCH=)abc/
+
+/(*CRLF)(*LIMIT_MATCH=)abc/
+
+
+
+/(*MARK:a\zb)z/alt_verbnames
+
+/(*:ab\t(d\)c)xxx/
+
+
+
+
+
+
+
+
+
+/(*:abc\Qpqr)/alt_verbnames
+
+
+
+
+
+
+
+#if !ebcdic
+
+
+
+#endif
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+#if !ebcdic
+
+
+
+
+#endif
+
+
+
+
+
+
+
+
+
+
+/((p(?'K/
+
+/((p(?'K/no_auto_capture
+
+
+/(?<!a{65535}a{5})x/I
+
+
+    
+
+/(?'abcdefghijklmnopqrstuvwxyzABCDEFGabcdefghijklmnopqrstuvwxyzABCDEabcdefghijklmnopqrstuvwxyzABCDEabcdefghijklmnopqrstuvwxyzABCDEFGH'toolong)/
+
+
+# These two use zero-termination
+/abcd/max_pattern_length=3
+
+
+# These two, being hex, pass the length
+/abcdefab/hex,max_pattern_length=3
+
+
+# Test compiled length limit
+/(abcdefg){10}/max_pattern_compiled_length=100
+
+# These patterns used to take a long time to compile
+
+
+
+
+"(?|()|())(?<=a()
+((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
+((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
+((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
+a)"xI
+
+# Test the use of malloc for caching group information when there are more
+# groups than fit into the on-stack workspace.
+
+
+# Test minlength capped at 65535
+
+
+# Test group scans when numbers are not unique
+
+
+
+
+
+# Test CRLF handling in empty string substitutions
+
+
+
+
+
+
+
+
+
+
+
+
+
+#if !ebcdic
+
+
+#endif
+
+# Tests for NULL characters in comments and verb "names" and callouts
+
+# /A#B\x00C\x0aZ/
+
+# /A+#B\x00C\x0a+/
+
+# /A(*:B\x00W#X\00Y\x0aC)Z/
+
+# /A(*:B\x00W#X\00Y\x0aC)Z/
+
+# /A(?C{X\x00Y})B/
+
+# /A(?#X\x00Y)B/
+
+# Tests for leading comment in extended patterns
+
+
+
+
+
+/(8(*:6^\x09x\xa6l\)6!|\xd0:[^:|)\x09d\Z\d{85*m(?'(?<1!)*\W[*\xff]!!h\w]*\xbe;/alt_bsux,alt_verbnames,allow_empty_class,dollar_endonly,extended,multiline,never_utf,no_dotstar_anchor,no_start_optimize
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/(?J)(?'a'))(?'a')/
+
+
+
+
+# Hex uses pattern length, not zero-terminated. This tests for overrunning
+# the given length of a pattern.
+
+/'(*U'/hex
+
+/'(*'/hex
+
+/'('/hex
+
+
+# These tests are here because Perl never allows a back reference in a
+# lookbehind. PCRE2 supports some limited cases.
+
+
+/(?|([ab]))...(?<=\1)z/
+
+
+/(a\2)(b\1)(?<=\2)/
+
+
+/(?<A>[ab])...(?<=\k'A')(?<A>)z/dupnames
+
+# Perl does not support \g+n
+
+
+
+
+# Perl accepts these, but gives a warning. We can't warn, so give an error.
+
+/[a-[:digit:]]+/
+    a-a9-a
+
+/[A-[:digit:]]+/
+    A-A9-A
+
+/[a-\d]+/
+    a-a9-a
+
+
+
+
+/()(?<=(?0))/
+
+
+
+
+/.>*?\g'0/use_length
+
+/.>*?\g'0/
+
+
+
+"(?(?C))"
+
+/(?(?(?(?(?(?))))))/
+
+
+/(*:ab)*/
+
+
+
+
+
+
+
+
+# This one is here because Perl gives an 'unmatched )' error which goes away
+# if one of the \) sequences is removed - which is weird. PCRE finds it too
+# complicated to find a minimum matching length.
+
+
+# This checks that new code for handling groups that may match an empty string
+# works on a very large number of alternatives. This pattern used to provoke a
+# complaint that it was too complicated.
+
+
+# This one used to compile rubbish instead of a compile error, and then
+# behave unpredictably at match time.
+
+/.+(?(?C'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'))?!XXXX.=X/
+    .+(?(?C'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'))?!XXXX.=X
+
+/[:[:alnum:]-[[a:lnum:]+/
+
+/((?(?C'')\QX\E(?!((?(?C'')(?!X=X));=)r*X=X));=)/
+
+
+
+/()(\g+65534)/
+
+/()(\g+65533)/
+
+
+
+
+
+# This is here because Perl matches, even though a COMMIT is encountered
+# outside of the recursion.
+
+
+
+
+# This test differs from Perl for the first subject. Perl ends up with
+# $1 set to 'B'; PCRE2 has it unset (which I think is right).
+
+
+# The first of these, when run by Perl, gives the mark 'aa', which is wrong.
+
+
+
+
+
+
+/\g{3/
+
+
+# Perl matches this one, but PCRE does not because (*ACCEPT) clears out any
+# pending backtracks in the recursion.
+
+
+# Perl gives no match for this one
+
+
+
+
+
+
+
+# Check auto-anchoring when there is a group that is never obeyed at
+# the start of a branch.
+
+
+
+# This should be anchored, as the condition is always false and there is
+# no alternative branch.
+
+
+# This should not be anchored.
+
+
+
+/(*LIMIT_HEAP=123/use_length
+
+/(*LIMIT_MATCH=/use_length
+
+/(*CRLF)(*LIMIT_DEPTH=/use_length
+
+/(*CRLF)(*LIMIT_RECURSION=1)(*BOGUS/use_length
+
+
+# ----------------------------------------------------------------------
+
+# These are a whole pile of tests that touch lines of code that are not
+# used by any other tests (at least when these were created).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ----------------------------------------------------------------------
+
+
+
+
+
+
+# Unsetting /x also unsets /xx
+
+
+
+# ----------------------------------------------------------------------
+# These test the dangerous PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL option.
+
+
+
+
+/[Q-\N]/B,bad_escape_is_literal
+
+/[\s-_]/bad_escape_is_literal
+
+/[_-\s]/bad_escape_is_literal
+
+/[\B\R\X]/B
+
+/[\B\R\X]/B,bad_escape_is_literal
+
+/[A-\BP-\RV-\X]/B
+
+/[A-\BP-\RV-\X]/B,bad_escape_is_literal
+
+# ----------------------------------------------------------------------
+
+
+
+
+
+
+//literal,extended
+
+
+
+
+
+
+# Confirm that the pcre2_set_optimize API does not have any undesired effect on literal patterns
+
+
+
+# These should result in errors, since it is not permitted to use the
+# PCRE2_NO_AUTO_POSSESS and PCRE2_NO_DOTSTAR_ANCHOR options on a literal pattern
+/(cat)|dog/literal,no_auto_possess
+
+/(cat)|dog/literal,no_dotstar_anchor
+
+
+# Perl gets this wrong, failing to capture 'b' in group 1.
+
+    
+# And again here, for the "babc" subject string. 
+
+
+/[[:digit:]-a]/
+
+/[[:digit:]-[:print:]]/
+
+/[\d-a]/
+
+/[\H-z]/
+
+/[\d-[:print:]]/
+
+# Perl gets the second of these wrong, giving no match.
+
+
+    
+# JIT does not support callout_extra  
+    
+    
+
+
+
+
+    
+# These tests are matched in test 1 as they are Perl compatible. Here we are
+# looking at what does and does not get auto-possessified. 
+
+
+    
+
+
+
+
+
+
+# Perl behaves differently with these when optimization is turned off
+
+
+
+/(?^x-i)AB/ 
+
+/(?^-i)AB/ 
+
+/(?x-i-i)/
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/(?(*ACCEPT)xxx)/
+
+/(?(*atomic:xx)xxx)/
+
+/(?(*script_run:xxx)zzz)/
+
+
+
+
+
+
+
+
+/\[()]{65535}()/expand
+
+/\[()]{65535}(?<A>)/expand
+
+
+
+
+/(*:\)?/
+
+/(*:\Q \E){5}/alt_verbnames
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Addition overflow
+/( {32742} {42})(?<!\1{65481})/
+
+# Multiplication overflow
+/(X{65535})(?<=\1{32770})/
+
+# ---- Non-atomic assertion tests ----
+
+# Expect error: not allowed as a condition
+/(?(*napla:xx)bc)/
+
+
+
+
+
+    
+    
+ 
+
+
+
+
+
+
+
+    
+    
+
+
+
+# ----
+
+# Expect error (recursion => not fixed length)
+/(\2)((?=(?<=\1)))/
+
+
+
+    
+   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     
+
+
+
+
+
+
+    
+
+
+
+
+
+# Expect non-fixed-length error
+
+"(?<=X(?(DEFINE)(.*))(?1))."
+
+#if !ebcdic
+
+
+
+
+
+#loadtables ./testbtables
+
+
+#endif
+
+
+
+/(?(VERSION=0.0/
+
+# Perl has made \K in lookarounds an error. PCRE2 now rejects as well, unless
+# explicitly authorized.
+
+/(?=a\Kb)ab/
+
+
+/(?!a\Kb)ac/
+
+    
+/^abc(?<=b\Kc)d/
+
+
+/^abc(?<!b\Kq)d/
+
+    
+# --------- 
+
+# Tests for zero-length NULL to be treated as an empty string.
+
+
+
+
+
+# --------- 
+
+
+
+
+    
+# Check imposition of maximum by match_data_create().
+
+
+# Use recurse to test \K and Mark in atomic scope.
+
+    
+# Check use of NULL pattern with zero length.
+
+    
+//null_pattern
+
+/bad null pattern/null_pattern,use_length
+
+/bad null pattern/null_pattern
+
+# -------- Variable length lookbehinds --------
+/12345(?<=\d{1,256})X/
+
+
+/12345(?<=a?bc)X/max_varlookbehind=0
+
+
+/(?<!( {65054}){9,44965})/
+
+
+
+# --------
+
+
+/(?<!( {65054}){0,44965})/auto_callout
+
+/A+{,3}/
+
+
+# This doesn't work in Perl (though I think it used to)
+
+    
+# These are different to Perl because of the different capturing in repeating
+# groups.
+
+
+
+
+
+# --------
+
+
+
+
+
+
+
+
+# This matches a character that only exists once in the subject, sort of like a
+# hypothetical "(.)(?<!\1.+)(?!.*\1)". That has unlimited variable length
+# lookbehind, so is invalid. This pattern doesn't work in Perl 5.38.0.
+
+
+
+
+
+
+
+
+
+    
+
+
+
+    
+# This test is crashing Perl 5.38.2.
+
+
+
+
+# The behaviour of these tests is different from Perl because PCRE2 doesn't
+# recognize \Q or \E within a quantifier, so these examples are not treated
+# as quantifiers. Subsequent processing of the string removes the escapes.
+
+    
+    
+# --------------
+
+
+
+
+
+# Tests for scan substring, a non Perl feature of PCRE2
+
+# Parse errors first
+
+/(*scs:/
+
+/(*scan_substring:(/
+
+/(*scs:('name'/
+
+/(*scs:(1)a|b)/
+
+/(*scs:(0)a)/
+
+/(*scan_substring:(1)a|b)/
+
+/(*scs:(<name>)a|b)/
+
+/(*scan_substring:(<name>)a|b)/
+
+/()(*scs:(1)+a)/
+
+/()(*scs:(1,1,1,1,1,1,1,1,2))/
+
+/()()(*scs:(1,2,1,2,1,2,2,'XYZ'))/
+
+# Tests for iterating scan_substring
+
+
+
+
+
+
+
+
+
+
+
+
+
+/(\w++)=(?(*scs:(1)(abc))pqr|xyz)(\w++)/
+
+# Tests for scan_substring
+
+    ##string##next!##
+
+        ##
+    ##abcd##abcd##cd##
+    ##abcd##abcd##abcd##
+
+
+
+    ##abABCtuTUVXz##abCDEFGxyCDEEFGhi##
+    ##abAABCtuTUVXXz!!abCDEFGxyCDEFGGhi##
+
+    ##cdefgh##cdeabxy##
+
+    ##cdefgh##cdeabxy##
+
+    ##xyz##abc##!
+    ##xyz##!
+    ##xyz##
+
+    ##abc##abc##!
+    ##abc##xyz##:
+    ##abc###
+
+    ##abc##abc##!
+    ##abc##xyz##:
+    ##nnn##!
+    ##nnn##:
+
+  
+      
+
+
+
+
+
+
+
+
+
+# Custom backtrack, goes back n - 1 characters in the input (n=8)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Relative reference
+
+
+
+
+
+
+
+# List of captures
+
+
+
+
+
+
+
+# Duplicated capture references
+
+
+
+
+
+# Tests for pcre2_set_optimize()
+
+
+
+
+
+
+# If pcre2_set_optimize() is used to turn on some optimization, but at the same time,
+# the compile options word turns it off... the compile options word "wins":
+
+
+
+
+# --------------
+
+# larger than GROUP_MAX, smaller than INT_MAX
+/a\800000b/
+
+# coming up on INT_MAX... (used to succeed with \8 being literal 8)
+/a\800000000b/
+
+# over INT_MAX (used to succeed with \8 being literal 8)
+/a\8000000000b/
+
+# --------------
+
+# no_bs0
+
+
+/a\0b/no_bs0
+
+
+
+
+# python_octal
+
+#if !ebcdic
+
+
+/\1/
+
+
+
+
+/\1/python_octal
+
+/\12/python_octal
+
+
+#endif
+
+# --------------
+
+
+/a(?C)b/never_callout
+
+# --------------
+
+# EXTENDED CHARACTER CLASSES (UTS#18)
+
+
+/[a[]/alt_extended_class
+
+/[a[B]/alt_extended_class
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/[a--/alt_extended_class
+
+/[a--a/alt_extended_class
+
+/[a--[a/alt_extended_class
+
+/[a--[a]/alt_extended_class
+
+/[a--[a]--/alt_extended_class
+
+/[a--]/alt_extended_class
+
+/[--a]/alt_extended_class
+
+/[^--a]/alt_extended_class
+
+/[--]/alt_extended_class
+
+/[a---b]/alt_extended_class
+
+/[a----b]/alt_extended_class
+
+/[a&&&b]/alt_extended_class
+
+/[a|||b]/alt_extended_class
+
+/[a~~~b]/alt_extended_class
+
+/[a~~~~b]/alt_extended_class
+
+/[a~~/alt_extended_class
+
+/[a~~~/alt_extended_class
+
+/[a~~~~/alt_extended_class
+
+/[a||b&&c]/alt_extended_class
+
+/[a||b~~c]/alt_extended_class
+
+/[a~~b&&c]/alt_extended_class
+
+/[a--b~~c]/alt_extended_class
+
+/[a--b&&c]/alt_extended_class
+
+/[a||b--c]/alt_extended_class
+
+
+/[\d-z]/B,alt_extended_class
+
+/[z-\d]/B,alt_extended_class
+
+
+
+/[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[z]&&a]]]]]]]]]]]]]]]/alt_extended_class
+
+/[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a&&a[z]]]]]]]]]]]]]]]]/alt_extended_class
+
+/[z&/alt_extended_class
+
+
+
+# --------------
+
+# EXTENDED CHARACTER CLASSES (Perl)
+
+# allow-empty-class does nothing inside (?[...])
+
+# bad-escape-is-literal does nothing inside (?[...])
+/[ \j ]/
+
+/[ /\
+
+/(?[ \j ])/
+
+/(?[ /\
+
+
+/[ /\bad_escape_is_literal
+
+/(?[ \j ])/bad_escape_is_literal
+
+/(?[ /\bad_escape_is_literal
+
+/(?[ [\j] ])/bad_escape_is_literal
+
+/(?[ (\j) ])/bad_escape_is_literal
+
+# We can't test error cases in testinput1
+
+/(?[])/
+
+/(?[/
+
+/(?[]/
+
+/(?[\n/
+
+/(?[\n]/
+
+/(?[\n]z)/
+
+/(?[\n] )/
+
+/(?[(/
+
+/(?[( /
+
+/(?[(\n/
+
+/(?[ \n + () ])/
+
+/(?[1])/
+
+/(?[a])/
+
+/(?[a-c])/
+
+/(?[(])/
+
+/(?[(\n])/
+
+/(?[\n)])/
+
+/(?[^\n])/
+
+/(?[ \n \t ])/
+
+/(?[ \d \t ])/
+
+/(?[ [\n] \t ])/
+
+/(?[ (\n) \t ])/
+
+/(?[ [:alpha:] \t ])/
+
+/(?[ \n + \t \d ])/
+
+/(?[ !\n \t ])/
+
+/(?[ \n [:alpha:] ])/
+
+/(?[ \n [\d] ])/
+
+/(?[ \n (\t) ])/
+
+/(?[ \n !\t ])/
+
+/(?[ \n \t ])/
+
+/(?[:graph:])/
+
+/(?[\Qn\E])/
+
+# maximum depth tests
+
+
+/(?[\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+([\n]&\n))))))))))))))])/
+
+/(?[\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n&[\n]))))))))))))))])/
+
+/(?[\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+((\n)&\n))))))))))))))])/
+
+# --------------
+
+/[[:digit:]   -Z]/xx
+
+/[\d   -Z]/xx
+
+/[[:digit:]\E-H]/
+
+/[[:digit:]\Q\E-H]+/
+
+/[z-[:space:]]/
+
+/[z-\d]/
+
+/[[:space:]-z]/
+
+/[\d-z]/
+
+/[\d-\w]/
+
+/[\Q/
+
+/[\Q/\
+
+/[\Q\E/
+
+/[\Q\n/
+
+/[\Q\n]/
+
+/[\Q\n/\
+
+/[\Q\n\]/
+
+/[\Q\n\E/
+
+
+/[z\Q/
+
+/[z\Q/\
+
+/[z\Q\E/
+
+/[/\
+
+/[\n/
+
+/[\E/
+
+
+
+
+#if !ebcdic
+
+
+#endif
+
+
+
+
+#if !ebcdic
+
+
+
+
+#endif
+
+/[\A]/
+
+/[\Z]/
+
+/[\z]/
+
+/[\G]/
+
+/[\K]/
+
+
+
+
+#if !ebcdic
+
+
+#endif
+
+# --------------
+
+# Attempt at full coverage of the substitution buffer-management code - not
+# just covering each line in each macro, but covering each instantiation of each
+# line in those macros.
+
+#
+# CHECKMEMCPY tests
+#
+# Four conditions for CHECKMEMCPY:
+#   no overflow;
+#   first overflow (with/without substitute_overflow_length);
+#   overflow after previous overflow
+# Additionally some CHECKMEMCPYs have a substitute_replacement_only branch.
+#
+
+# pre-start-offset fragment
+# no "overflow after previous overflow" condition
+
+# pre-match fragment
+
+# empty match bumpalong
+
+# literal replacement
+
+# a MARK
+
+# a subject fragment
+
+# a zero-length subject fragment
+
+#if !ebcdic
+
+# a data character via an escape
+
+#endif
+
+# a replacement literal character
+
+# a cancelled substitution
+# no "overflow after previous overflow" condition
+
+# the rest of the subject
+
+# the trailing NULL
+
+#
+# CHECKCASECPY tests
+#
+# The same four conditions for CHECKCASECPY as for CHECKMEMCPY:
+#   no overflow;
+#   first overflow (with/without substitute_overflow_length);
+#   overflow after previous overflow
+# Also the condition where CHECKCASECPY isn't called due to a custom callout
+#
+
+# a MARK
+
+# a subject fragment
+
+# a zero-length subject fragment
+
+#if !ebcdic
+
+# a data character via an escape
+
+#endif
+
+# a replacement literal character
+
+#
+# DELAYEDFORCECASE tests
+#
+# Some different triggering conditions for DELAYEDFORCECASE:
+#   no overflow;
+#   first overflow (with/without substitute_overflow_length);
+#   if there was a previous overflow, then the case callout can't be invoked
+# Also, the CASEERROR branch.
+# Also, the branch for where chars_outstanding is zero, both with and without
+#   a previous overflow.
+#
+
+# on set casing mode
+
+# trailing fragment
+
+#
+# do_case_copy tests
+#
+
+
+
+
+
+
+#
+# special test-callback case transformation tests
+#
+
+
+# --------------
+
+# Tests for recurse with returned captures
+
+# Parse error tests
+
+/(?1/
+
+/(?1(/
+
+/(?R(1/
+
+/(?R(1,/
+
+/(?R0(1,2!/
+
+/(?1(1,0))()/
+
+/(?1(1,+2))()/
+
+/(?1(<name>))/
+
+# Operation tests
+
+
+
+
+
+        #
+
+        #
+
+
+  #axyb#axax#
+
+
+
+
+  # returns the Sat/Sun prefix as \k<short>.
+  # Call the routine. Matches "Saturday,Sat" or "Sunday,Sun".
+
+# Test each syntax used for recursion
+
+
+
+
+
+
+
+/(?(DEFINE)(?<fn>(?<ret>Sat)urday))\g<fn('ret')>,\k<ret>/
+
+
+/(?(DEFINE)((Sat)urday))(?1()),\2/
+
+
+# --------------
+
+# End of testinput2

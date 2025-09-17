@@ -1,0 +1,30 @@
++++
+title = "pcre2_substring_free"
+aliases = ["/doc/html/pcre2_substring_free.html"]
++++
+
+<h2>
+SYNOPSIS
+</h2>
+<p>
+<b>#include &#60;pcre2.h&#62;</b>
+</p>
+<p>
+<b>void pcre2_substring_free(PCRE2_UCHAR *<i>buffer</i>);</b><br>
+
+</p>
+<h2>
+DESCRIPTION
+</h2>
+<p>
+This is a convenience function for freeing the memory obtained by a previous
+call to <b>pcre2_substring_get_byname()</b> or
+<b>pcre2_substring_get_bynumber()</b>. Its only argument is a pointer to the
+string. If the argument is NULL, the function does nothing.
+</p>
+<p>
+There is a complete description of the PCRE2 native API in the
+<a href="../pcre2api/"><b>pcre2api</b></a>
+page and a description of the POSIX API in the
+<a href="../pcre2posix/"><b>pcre2posix</b></a>
+page.

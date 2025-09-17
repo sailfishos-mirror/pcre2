@@ -1,0 +1,15 @@
+Add $+ support to substitute
+
+Remove UTF-21
+
+Update z/OS docs
+
+Website
+ - better hover for top-left icon
+ - much better HTML conversion of the man pages
+ - make the READMEs into markdown
+ - TOC for man pages; better navigation
+
+x Add .editorconfig
+x [No] Add Codespace config?
+x [No] Remove VMS and "native z/OS"

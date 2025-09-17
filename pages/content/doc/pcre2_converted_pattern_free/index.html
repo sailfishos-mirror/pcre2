@@ -1,0 +1,29 @@
++++
+title = "pcre2_converted_pattern_free"
+aliases = ["/doc/html/pcre2_converted_pattern_free.html"]
++++
+
+<h2>
+SYNOPSIS
+</h2>
+<p>
+<b>#include &#60;pcre2.h&#62;</b>
+</p>
+<p>
+<b>void pcre2_converted_pattern_free(PCRE2_UCHAR *<i>converted_pattern</i>);</b><br>
+
+</p>
+<h2>
+DESCRIPTION
+</h2>
+<p>
+This function is part of an experimental set of pattern conversion functions.
+It frees the memory occupied by a converted pattern that was obtained by
+calling <b>pcre2_pattern_convert()</b> with arguments that caused it to place
+the converted pattern into newly obtained heap memory. If the argument is NULL,
+the function returns immediately without doing anything.
+</p>
+<p>
+The pattern conversion functions are described in the
+<a href="../pcre2convert/"><b>pcre2convert</b></a>
+documentation.

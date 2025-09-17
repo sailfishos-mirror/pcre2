@@ -1,0 +1,33 @@
++++
+title = "pcre2_code_copy_with_tables"
+aliases = ["/doc/html/pcre2_code_copy_with_tables.html"]
++++
+
+<h2>
+SYNOPSIS
+</h2>
+<p>
+<b>#include &#60;pcre2.h&#62;</b>
+</p>
+<p>
+<b>pcre2_code *pcre2_code_copy_with_tables(const pcre2_code *<i>code</i>);</b><br>
+
+</p>
+<h2>
+DESCRIPTION
+</h2>
+<p>
+This function makes a copy of the memory used for a compiled pattern, excluding
+any memory used by the JIT compiler. Without a subsequent call to
+<b>pcre2_jit_compile()</b>, the copy can be used only for non-JIT matching.
+Unlike <b>pcre2_code_copy()</b>, a separate copy of the character tables is also
+made, with the new code pointing to it. This memory will be automatically freed
+when <b>pcre2_code_free()</b> is called. The yield of the function is NULL if
+<i>code</i> is NULL or if sufficient memory cannot be obtained.
+</p>
+<p>
+There is a complete description of the PCRE2 native API in the
+<a href="../pcre2api/"><b>pcre2api</b></a>
+page and a description of the POSIX API in the
+<a href="../pcre2posix/"><b>pcre2posix</b></a>
+page.

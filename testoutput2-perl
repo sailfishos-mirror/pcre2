@@ -1,0 +1,4232 @@
+Perl v5.38.2
+# This set of tests is not Perl-compatible. It checks on special features
+# of PCRE2's API, error diagnostics, and the compiled code of some patterns.
+# It also checks the non-Perl syntax that PCRE2 supports (Python, .NET,
+# Oniguruma). There are also some tests where PCRE2 and Perl differ,
+# either because PCRE2 can't be compatible, or there is a possible Perl
+# bug.
+
+# NOTE: This is a non-UTF set of tests. When UTF support is needed, use
+# test 5.
+
+#forbid_utf
+#newline_default lf any anycrlf
+
+# Test binary zeroes in the pattern
+
+# /a\0B/ where 0 is a binary zero
+
+# /a0b/ where 0 is a binary zero
+
+# /(?#B0C)DE/ where 0 is a binary zero
+
+
+
+
+
+
+
+
+
+/ab\idef/
+
+/(?X)ab\idef/
+Failed: error XXX at offset 3: XXX
+
+/x{5,4}/
+
+/z{65536}/
+
+/[abcd/
+Failed: error XXX at offset 1: XXX
+
+/[\B]/B
+Error: Unknown regexp modifier "/B" at (eval 6) line 1, at end of line
+
+/[\R]/B
+Error: Unknown regexp modifier "/B" at (eval 7) line 1, at end of line
+
+/[\X]/B
+Error: Unknown regexp modifier "/B" at (eval 8) line 1, at end of line
+
+/[z-a]/
+Failed: error XXX at offset 4: XXX
+
+/^*/
+
+/(abc/
+Failed: error XXX at offset 1: XXX
+
+/(?# abc/
+Error: Sequence (?#... not terminated in regex m/(?# abc/ at (eval 12) line 1, <INFILE> line 52.
+
+/(?z)abc/
+Failed: error XXX at offset 3: XXX
+
+
+
+
+
+
+
+
+
+/(ab\2)/
+Failed: error XXX at offset 5: XXX
+
+/{4,5}abc/
+
+
+
+
+/(a)(b)(c)(d)(e)\6/
+Failed: error XXX at offset 17: XXX
+
+
+
+/ab(?z)cd/
+Failed: error XXX at offset 5: XXX
+
+
+
+/)/
+Failed: error XXX at offset 1: XXX
+
+/a[]b/
+Failed: error XXX at offset 2: XXX
+
+
+
+
+
+
+
+
+
+
+/abc(?<=a+)b/
+Error: Lookbehind longer than 255 not implemented in regex m/abc(?<=a+)b/ at (eval 20) line 1, <INFILE> line 92.
+
+
+
+
+
+
+
+
+
+
+
+
+/(a)(?(1)a|b|c)/
+Failed: error XXX at offset 12: XXX
+
+/(?(?=a)a|b|c)/
+Failed: error XXX at offset 11: XXX
+
+/(?(1a)/
+Failed: error XXX at offset 5: XXX
+
+/(?(1a))/
+Failed: error XXX at offset 5: XXX
+
+/(?(?i))/
+Failed: error XXX at offset 4: XXX
+
+/(?(abc))/
+Failed: error XXX at offset 4: XXX
+
+/(?(?<ab))/
+Failed: error XXX at offset 7: XXX
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/(?<=ab(c+)d)ef/
+Error: Lookbehind longer than 255 not implemented in regex m/(?<=ab(c+)d)ef/ at (eval 28) line 1, <INFILE> line 134.
+
+/(?<=ab(?<=c+)d)ef/
+Error: Lookbehind longer than 255 not implemented in regex m/(?<=ab(?<=c+)d)ef/ at (eval 29) line 1, <INFILE> line 136.
+
+
+
+
+
+
+
+# Perl does not fail these two for the final subjects.
+
+
+
+# These are syntax tests from Perl 5.005
+
+/a[b-a]/
+Failed: error XXX at offset 5: XXX
+
+/a[]b/
+Failed: error XXX at offset 2: XXX
+
+/a[/
+Failed: error XXX at offset 2: XXX
+
+/*a/
+Failed: error XXX at offset 1: XXX
+
+/(*)b/
+Failed: error XXX at offset 3: XXX
+
+/abc)/
+Failed: error XXX at offset 4: XXX
+
+/(abc/
+Failed: error XXX at offset 1: XXX
+
+/a**/
+Failed: error XXX at offset 3: XXX
+
+/)(/
+Failed: error XXX at offset 1: XXX
+
+/\1/
+Failed: error XXX at offset 2: XXX
+
+/\2/
+Failed: error XXX at offset 2: XXX
+
+/(a)|\2/
+Failed: error XXX at offset 6: XXX
+
+/a[b-a]/Ii
+Failed: error XXX at offset 5: XXX
+
+/a[]b/Ii
+Failed: error XXX at offset 2: XXX
+
+/a[/Ii
+Failed: error XXX at offset 2: XXX
+
+/*a/Ii
+Failed: error XXX at offset 1: XXX
+
+/(*)b/Ii
+Failed: error XXX at offset 3: XXX
+
+/abc)/Ii
+Failed: error XXX at offset 4: XXX
+
+/(abc/Ii
+Failed: error XXX at offset 1: XXX
+
+/a**/Ii
+Failed: error XXX at offset 3: XXX
+
+/)(/Ii
+Failed: error XXX at offset 1: XXX
+
+/:(?:/
+Failed: error XXX at offset 2: XXX
+
+/(?<%)b/
+Failed: error XXX at offset 4: XXX
+
+/a(?{)b/
+Error: syntax error at (eval 53) line 1, near "{)"
+Execution of (eval 53) aborted due to compilation errors.
+
+/a(?{{})b/
+Error: syntax error at (eval 54) line 1, near "})"
+Execution of (eval 54) aborted due to compilation errors.
+
+/a(?{}})b/
+Error: Sequence (?{...}) not terminated with ')' at (eval 55) line 1, <INFILE> line 200.
+
+/a(?{"{"})b/
+
+/a(?{"{"}})b/
+Error: Sequence (?{...}) not terminated with ')' at (eval 57) line 1, <INFILE> line 204.
+
+/(?(1?)a|b)/
+Failed: error XXX at offset 5: XXX
+
+/[a[:xyz:/
+Failed: error XXX at offset 1: XXX
+
+/(?<=x+)y/
+Error: Lookbehind longer than 255 not implemented in regex m/(?<=x+)y/ at (eval 60) line 1, <INFILE> line 210.
+
+/a{37,17}/
+
+/abc/\
+Error: syntax error at (eval 62) line 1, near "/abc/\"
+Execution of (eval 62) aborted due to compilation errors.
+
+/abc/\i
+Error: syntax error at (eval 63) line 1, near "/abc/\"
+Execution of (eval 63) aborted due to compilation errors.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/[[.ch.]]/I
+Failed: error XXX at offset 7: XXX
+
+/[[=ch=]]/I
+Failed: error XXX at offset 7: XXX
+
+/[[:rhubarb:]]/I
+Failed: error XXX at offset 12: XXX
+
+
+
+
+/[\200-\110]/I
+Failed: error XXX at offset 10: XXX
+
+/^(?(0)f|b)oo/I
+Failed: error XXX at offset 5: XXX
+
+# This one's here because of the large output vector needed
+
+
+# This one's here because Perl does this differently and PCRE2 can't at present
+
+
+# These are all cases where Perl does it differently (nested captures)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ----------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+         
+
+
+
+
+
+
+
+# For comparison with the following test, which disables auto-possessification
+# In this regex, x+ should be converted to x++
+
+# In this regex, x+ should not be converted to x++
+
+# Also in this regex, x+ should not be converted to x++
+
+# In this one too, x+ should not be converted to x++
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/a+?+/I
+Failed: error XXX at offset 4: XXX
+
+/a{2,3}?+b/I
+Failed: error XXX at offset 8: XXX
+
+/(?U)a+?+/I
+Failed: error XXX at offset 3: XXX
+
+/a{2,3}?+b/I,ungreedy
+Failed: error XXX at offset 8: XXX
+
+
+
+
+
+
+/[.x.]/I
+Error: Unknown regexp modifier "/I" at (eval 73) line 1, at end of line
+
+/[=x=]/I
+Error: Unknown regexp modifier "/I" at (eval 74) line 1, at end of line
+
+/[:x:]/I
+Error: Unknown regexp modifier "/I" at (eval 75) line 1, at end of line
+
+/\F/I
+Error: Unknown regexp modifier "/I" at (eval 76) line 1, at end of line
+
+/\l/I
+Error: Unknown regexp modifier "/I" at (eval 77) line 1, at end of line
+
+/\L/I
+Error: Unknown regexp modifier "/I" at (eval 78) line 1, at end of line
+
+/\N{name}/I
+Error: Unknown regexp modifier "/I" at (eval 79) line 1, at end of line
+
+/\u/I
+Error: Unknown regexp modifier "/I" at (eval 80) line 1, at end of line
+
+/\U/I
+Error: Unknown regexp modifier "/I" at (eval 81) line 1, at end of line
+
+
+/\N{,}/
+Error: Unknown charname ',' at (eval 82) line 1, within pattern
+
+/\N{25,ab}/
+Error: Unknown charname '25,ab' at (eval 87) line 1, within pattern
+
+/[\N]/
+Failed: error XXX at offset 3: XXX
+
+/[\N{4}]/
+Failed: error XXX at offset 3: XXX
+
+/[\N{name}]/
+Error: Unknown charname 'name' at (eval 90) line 1, within pattern
+
+
+/[/I
+Failed: error XXX at offset 1: XXX
+
+/[a-/I
+Failed: error XXX at offset 1: XXX
+
+/[[:space:]/I
+Failed: error XXX at offset 1: XXX
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/(?C256)ab/I
+Failed: error XXX at offset 3: XXX
+
+/(?Cab)xx/I
+Failed: error XXX at offset 3: XXX
+
+/(?C12vr)x/I
+Failed: error XXX at offset 3: XXX
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/(?1)/I
+Failed: error XXX at offset 4: XXX
+
+/((?2)(abc)/I
+Failed: error XXX at offset 1: XXX
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/(?P<x>eks)(?P<x>eccs)/I
+Error: Unknown regexp modifier "/I" at (eval 99) line 1, at end of line
+
+/(?P<abc>abc(?P<def>def)(?P<abc>xyz))/I
+Error: Unknown regexp modifier "/I" at (eval 100) line 1, at end of line
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/a{11111111111111111111}/I
+Failed: error XXX at offset 22: XXX
+
+/(){64294967295}/I
+Failed: error XXX at offset 14: XXX
+
+/(){2,4294967295}/I
+Failed: error XXX at offset 15: XXX
+
+
+
+
+
+
+
+
+
+
+
+
+/^((?P<A>a1)|(?P<A>a2)b)/I
+Error: Unknown regexp modifier "/I" at (eval 104) line 1, at end of line
+
+
+
+
+
+
+
+
+
+
+
+/^(?P<A>a) (?J:(?P<B>b)(?P<B>c)) (?P<A>d)/I
+Failed: error XXX at offset 13: XXX
+
+# In this next test, J is not set at the outer level; consequently it isn't set
+# in the pattern's options; consequently pcre2_substring_get_byname() produces
+# a random value.
+
+
+
+
+/(?:(?(2y)a|b)(X))+/I
+Failed: error XXX at offset 8: XXX
+
+/(?:(?(ZA)a|b)(?P<ZZ>X))+/I
+Failed: error XXX at offset 7: XXX
+
+
+
+/(?P<ABC/I
+Failed: error XXX at offset 7: XXX
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/(?<abc'x)(?'xyz'y)/I
+Failed: error XXX at offset 6: XXX
+
+/(?<abc>x)(?'xyz>y)/I
+Failed: error XXX at offset 15: XXX
+
+/(?P'abc'x)(?P<xyz>y)/I
+Failed: error XXX at offset 4: XXX
+
+
+/^(?P>abc)(?<abcd>xxx)/
+Failed: error XXX at offset 8: XXX
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/(?(<bc))/
+Failed: error XXX at offset 6: XXX
+
+/(?(''))/
+Failed: error XXX at offset 5: XXX
+
+/(?('R')stuff)/
+Failed: error XXX at offset 5: XXX
+
+
+
+/(?<A> (?'B' abc (?(R) (?(R&C)1) (?(R&B)2) X  |  (?1)  (?2)   (?R) ))) /x
+Failed: error XXX at offset 28: XXX
+
+/^(?(DEFINE) abc | xyz ) /x
+Failed: error XXX at offset 18: XXX
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/^(a)\g-2/
+Failed: error XXX at offset 7: XXX
+
+/^(a)\g/
+Failed: error XXX at offset 6: XXX
+
+/^(a)\g{0}/
+Failed: error XXX at offset 7: XXX
+
+/^(a)\g{3/
+Failed: error XXX at offset 8: XXX
+
+/^(a)\g{aa}/
+Failed: error XXX at offset 9: XXX
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/x(?-0)y/
+Failed: error XXX at offset 5: XXX
+
+/x(?-1)y/
+Failed: error XXX at offset 6: XXX
+
+/x(?+0)y/
+Failed: error XXX at offset 5: XXX
+
+/x(?+1)y/
+Failed: error XXX at offset 6: XXX
+
+
+
+/(?(-1)a)/B
+Failed: error XXX at offset 4: XXX
+
+
+/((?(-2)a))/B
+Failed: error XXX at offset 5: XXX
+
+
+
+/\g{A/
+Failed: error XXX at offset 4: XXX
+
+
+
+
+
+
+
+
+
+#if !ebcdic
+
+
+#endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/[\E]AAA/
+Failed: error XXX at offset 1: XXX
+
+/[\Q\E]AAA/
+Failed: error XXX at offset 1: XXX
+
+/[^\E]AAA/
+Failed: error XXX at offset 1: XXX
+
+/[^\Q\E]AAA/
+Failed: error XXX at offset 1: XXX
+
+/[\E^]AAA/
+Failed: error XXX at offset 1: XXX
+
+/[\Q\E^]AAA/
+Failed: error XXX at offset 1: XXX
+
+
+
+
+
+
+
+
+/a(*MARK)b/
+Failed: error XXX at offset 7: XXX
+
+/\g6666666666/
+Failed: error XXX at offset 2: XXX
+
+
+/(?1)\c[/
+Failed: error XXX at offset 4: XXX
+
+
+
+
+
+/a(*CR)b/
+Failed: error XXX at offset 6: XXX
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/(?<a>)(?&)/
+Failed: error XXX at offset 10: XXX
+
+/(?<abc>)(?&a)/
+Failed: error XXX at offset 12: XXX
+
+/(?<a>)(?&aaaaaaaaaaaaaaaaaaaaaaa)/
+Failed: error XXX at offset 32: XXX
+
+/(?+-a)/
+Failed: error XXX at offset 4: XXX
+
+/(?-+a)/
+Failed: error XXX at offset 4: XXX
+
+/(?(-1))/
+Failed: error XXX at offset 4: XXX
+
+/(?(+10))/
+Failed: error XXX at offset 4: XXX
+
+/(?(10))/
+
+
+
+/\k''/
+Failed: error XXX at offset 4: XXX
+
+/\k<>/
+Failed: error XXX at offset 4: XXX
+
+/\k{}/
+Failed: error XXX at offset 4: XXX
+
+/\k/
+Failed: error XXX at offset 2: XXX
+
+/\kabc/
+Failed: error XXX at offset 2: XXX
+
+/(?P=)/
+Failed: error XXX at offset 5: XXX
+
+/(?P>)/
+Failed: error XXX at offset 5: XXX
+
+/[[:foo:]]/
+Failed: error XXX at offset 8: XXX
+
+/[[:1234:]]/
+Failed: error XXX at offset 9: XXX
+
+/[[:f\oo:]]/
+Failed: error XXX at offset 9: XXX
+
+/[[: :]]/
+
+/[[:...:]]/
+
+/[[:l\ower:]]/
+Failed: error XXX at offset 11: XXX
+
+/[[:abc\:]]/
+Failed: error XXX at offset 9: XXX
+
+/[abc[:x\]pqr:]]/
+
+/[[:a\dz:]]/
+Failed: error XXX at offset 9: XXX
+
+/(^(a|b\g<-1'c))/
+Failed: error XXX at offset 8: XXX
+
+
+
+
+
+
+
+/(?2)[]a()b](abc)/
+Failed: error XXX at offset 4: XXX
+
+/(?2)[^]a()b](abc)/
+Failed: error XXX at offset 4: XXX
+
+
+
+
+/(?&N)[]a(?<N>)](?<M>abc)/
+Failed: error XXX at offset 4: XXX
+
+/(?&N)[]a(?<N>)](abc)/
+Failed: error XXX at offset 4: XXX
+
+/a[]b/
+Failed: error XXX at offset 2: XXX
+
+/a[^]b/
+Failed: error XXX at offset 2: XXX
+
+
+
+
+
+
+
+
+/a(*FAIL)+b/
+
+
+
+
+
+
+
+
+
+
+
+
+/^X(?5)(a)(?|(b)|(q))(c)(d)Y/
+Failed: error XXX at offset 6: XXX
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/(a)(?<=b+(?1))/
+Error: Lookbehind longer than 255 not implemented in regex m/(a)(?<=b+(?1))/ at (eval 173) line 1, <INFILE> line 1081.
+
+/(a+)(?<=b(?1))/
+Error: Lookbehind longer than 255 not implemented in regex m/(a+)(?<=b(?1))/ at (eval 174) line 1, <INFILE> line 1083.
+
+/(a(?<=b(?1)))/
+Error: Lookbehind longer than 255 not implemented in regex m/(a(?<=b(?1)))/ at (eval 175) line 1, <INFILE> line 1085.
+
+/(?<=b(?1))xyz/
+Failed: error XXX at offset 9: XXX
+
+/(?<=b(?1))xyz(b+)pqrstuvew/
+Error: Lookbehind longer than 255 not implemented in regex m/(?<=b(?1))xyz(b+)pqrstuvew/ at (eval 177) line 1, <INFILE> line 1089.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                 # quote, otherwise match up to next space
+Error: syntax error at (eval 178) line 1, at EOF
+Execution of (eval 178) aborted due to compilation errors.
+
+
+
+/(?|(?<a>A)|(?<b>B))/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# This one is here because Perl gives the match as "b" rather than "ab". I
+# believe this to be a Perl bug.
+
+
+
+/abc(*MARK:)pqr/
+Failed: error XXX at offset 10: XXX
+
+/abc(*:)pqr/
+Failed: error XXX at offset 6: XXX
+
+
+# This should, and does, fail. In Perl, it does not, which I think is a
+# bug because replacing the B in the pattern by (B|D) does make it fail.
+# Turning off Perl's optimization by inserting (??{""}) also makes it fail.
+
+
+# These should be different, but in Perl they are not, which I think
+# is a bug in Perl.
+
+
+
+# Mark names can be duplicated. Perl doesn't give a mark for this one,
+# though PCRE2 does.
+
+
+# COMMIT at the start of a pattern should be the same as an anchor. Perl
+# optimizations defeat this. So does the PCRE2 optimization unless we disable
+# it.
+
+
+
+
+
+
+# Perl gets some of these wrong
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#if !ebcdic
+
+/^\cģ/
+Failed: error XXX at offset 4: XXX
+
+#endif
+
+
+
+/(?P<abn>(?P=abn)(?<badstufxxx)/B
+Failed: error XXX at offset 29: XXX
+
+/(?P<abn>(?P=axn)xxx)/B
+Failed: error XXX at offset 15: XXX
+
+
+# These tests are here because Perl gets the first one wrong.
+
+
+
+
+# -------------
+
+
+
+
+
+
+
+/(?<=(abc)+)X/
+Error: Lookbehind longer than 255 not implemented in regex m/(?<=(abc)+)X/ at (eval 185) line 1, <INFILE> line 1216.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Perl doesn't get these right IMO (the 3rd is PCRE2-specific)
+
+
+
+
+
+
+
+
+
+
+
+
+# These are here because they are not Perl-compatible; the studying means the
+# mark is not seen.
+
+
+
+# ----------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#if !ebcdic
+
+
+
+
+
+
+
+    
+
+
+#endif
+
+
+
+
+
+
+
+/a[\NB]c/
+Failed: error XXX at offset 4: XXX
+
+/a[B-\Nc]/
+Failed: error XXX at offset 6: XXX
+
+/a[B\Nc]/
+Failed: error XXX at offset 5: XXX
+
+
+
+# This test, with something more complicated than individual letters, causes
+# different behaviour in Perl. Perhaps it disables some optimization; no tag is
+# passed back for the failures, whereas in PCRE2 there is a tag.
+
+
+# Perl doesn't give marks for these, though it does if the alternatives are
+# replaced by single letters.
+
+
+
+# After a partial match, the behaviour is as for a failure.
+
+
+# These are here because Perl doesn't return a mark, except for the first.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# These are all run as real matches in test 1; here we are just checking the
+# settings of the anchored and startline bits.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Perl seems to have a bug with this one.
+
+
+# Here are some that Perl treats differently because of the way it handles
+# backtracking verbs.
+
+
+
+
+
+
+
+
+
+
+
+
+
+# This test causes a segfault with Perl 5.18.0
+
+
+
+
+
+
+# A complete set of tests for auto-possessification of character types, but
+# omitting \C because it might be disabled (it has its own tests).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        #
+Error: syntax error at (eval 189) line 1, at EOF
+Execution of (eval 189) aborted due to compilation errors.
+
+        #
+Error: syntax error at (eval 190) line 1, at EOF
+Execution of (eval 190) aborted due to compilation errors.
+
+
+
+
+
+
+
+
+
+
+
+
+        #
+Error: syntax error at (eval 191) line 1, at EOF
+Execution of (eval 191) aborted due to compilation errors.
+
+        #
+Error: syntax error at (eval 192) line 1, at EOF
+Execution of (eval 192) aborted due to compilation errors.
+
+
+
+        #
+Error: syntax error at (eval 193) line 1, at EOF
+Execution of (eval 193) aborted due to compilation errors.
+
+
+
+
+
+
+# End of special auto-possessive tests
+
+/^A\o{1239}B/
+    A\123B
+ 0: ASB
+
+/^A\oB/
+Failed: error XXX at offset 4: XXX
+
+/^A\x{zz}B/
+
+/^A\x{12Z/
+Failed: error XXX at offset 7: XXX
+
+/^A\x{/
+Failed: error XXX at offset 5: XXX
+
+
+
+
+
+/[a-[:digit:]]+/
+
+/[A-[:digit:]]+/
+
+/[a-[.xxx.]]+/
+Failed: error XXX at offset 10: XXX
+
+/[a-[=xxx=]]+/
+Failed: error XXX at offset 10: XXX
+
+#if !ebcdic
+
+/[a-[!xxx!]]+/
+Failed: error XXX at offset 4: XXX
+
+
+#endif
+
+/[a-\d]+/
+
+/(?<0abc>xx)/
+Failed: error XXX at offset 4: XXX
+
+/(?&1abc)xx(?<1abc>y)/
+Failed: error XXX at offset 4: XXX
+
+/(?<ab-cd>xx)/
+Failed: error XXX at offset 5: XXX
+
+/(?'0abc'xx)/
+Failed: error XXX at offset 4: XXX
+
+/(?P<0abc>xx)/
+Failed: error XXX at offset 5: XXX
+
+/\k<5ghj>/
+Failed: error XXX at offset 4: XXX
+
+/\k'5ghj'/
+Failed: error XXX at offset 4: XXX
+
+/\k{2fgh}/
+Failed: error XXX at offset 4: XXX
+
+/(?P=8yuki)/
+Failed: error XXX at offset 5: XXX
+
+/\g{4df}/
+Failed: error XXX at offset 7: XXX
+
+/(?&1abc)xx(?<1abc>y)/
+Failed: error XXX at offset 4: XXX
+
+/(?P>1abc)xx(?<1abc>y)/
+Failed: error XXX at offset 5: XXX
+
+/\g'3gh'/
+Failed: error XXX at offset 2: XXX
+
+/\g<5fg>/
+Failed: error XXX at offset 2: XXX
+
+/(?(<4gh>)abc)/
+Failed: error XXX at offset 5: XXX
+
+/(?('4gh')abc)/
+Failed: error XXX at offset 5: XXX
+
+/(?(4gh)abc)/
+Failed: error XXX at offset 5: XXX
+
+/(?(R&6yh)abc)/
+Failed: error XXX at offset 6: XXX
+
+
+# Test the ugly "start or end of word" compatibility syntax.
+
+
+
+/[a[:<:]] should give error/
+
+
+
+# Test stack guard external calls.
+
+/(((a)))/stackguard=1
+Error: Unknown regexp modifier "/t" at (eval 226) line 1, at end of line
+Unknown regexp modifier "/k" at (eval 226) line 1, at end of line
+Regexp modifiers "/a" and "/u" are mutually exclusive at (eval 226) line 1, at end of line
+Unknown regexp modifier "/r" at (eval 226) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 226) line 1, at end of line
+
+/(((a)))/stackguard=2
+Error: Unknown regexp modifier "/t" at (eval 227) line 1, at end of line
+Unknown regexp modifier "/k" at (eval 227) line 1, at end of line
+Regexp modifiers "/a" and "/u" are mutually exclusive at (eval 227) line 1, at end of line
+Unknown regexp modifier "/r" at (eval 227) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 227) line 1, at end of line
+
+
+
+# End stack guard tests
+
+
+/\othing/
+Failed: error XXX at offset 2: XXX
+
+/\o{}/
+Failed: error XXX at offset 4: XXX
+
+/\o{whatever}/
+
+/\xthing/
+
+/^A\xZ/
+
+/^A\x/
+
+/\x{}/
+
+/\x{whatever}/
+
+/A\8B/
+Failed: error XXX at offset 3: XXX
+
+/A\9B/
+Failed: error XXX at offset 3: XXX
+
+# This one is here because Perl fails to match "12" for this pattern when the $
+# is present.
+
+
+# Perl gets this one wrong, giving "a" as the after text for ca and failing to
+# match for cd.
+
+
+# This should test both paths for processing OP_RECURSE.
+
+
+
+
+
+
+
+
+
+
+/(?(VERSION<10)yes|no)/
+Failed: error XXX at offset 4: XXX
+
+/(?(VERSION>10)yes|no)/
+Failed: error XXX at offset 4: XXX
+
+/(?(VERSION>=10.0.0)yes|no)/
+Failed: error XXX at offset 4: XXX
+
+/(?(VERSION=10.101)yes|no)/
+Failed: error XXX at offset 4: XXX
+
+# We should see the starting code unit, required code unit, and minimum length set for this regex:
+
+# None of the following three should have the starting code unit, required code unit, and minimum length set:
+
+
+
+
+
+
+/(((((a)))))/parens_nest_limit=2
+Error: Unknown regexp modifier "/r" at (eval 242) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 242) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 242) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 242) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 242) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 242) line 1, at end of line
+Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 242) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 242) line 1, at end of line
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#if !ebcdic
+
+
+#endif
+
+
+
+
+
+
+
+
+
+
+
+# For comparison with the following tests, which disable automatic dotstar anchoring
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Quantifiers are not allowed on condition assertions, but are otherwise
+# OK in conditions.
+
+/(?(?=0)?)+/
+Failed: error XXX at offset 8: XXX
+
+
+
+
+
+# These two pattern showeds up compile-time bugs
+
+
+
+# Callouts with string arguments
+
+/a(?C"/
+Failed: error XXX at offset 4: XXX
+
+/a(?C"a/
+Failed: error XXX at offset 4: XXX
+
+/a(?C"a"/
+Failed: error XXX at offset 4: XXX
+
+/a(?C"a"bcde(?C"b")xyz/
+Failed: error XXX at offset 4: XXX
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Binary zero in callout string
+#  a  (  ?  C  '  x     z  '  )  b
+
+
+
+# JIT gives a different error message for the infinite recursion
+
+
+# Perl fails to diagnose the absence of an assertion
+
+"(?(?<E>.*!.*)?)"
+Failed: error XXX at offset 14: XXX
+
+
+
+/(?<=\bABQ(3(?-7)))/
+Failed: error XXX at offset 16: XXX
+
+/(?<=\bABQ(3(?+7)))/
+Failed: error XXX at offset 16: XXX
+
+";(?<=()((?3))((?2)))"
+Error: Lookbehind longer than 255 not implemented in regex m/;(?<=()((?3))((?2)))/ at (eval 251) line 1, <INFILE> line 1762.
+
+# Perl loops on this (PCRE2 used to!)
+
+# duplicate matches
+
+
+# overlapping matches
+
+# not-sorted matches
+
+# CRLF cases
+
+
+
+
+
+
+
+
+
+
+
+
+/((((((((x))))))))\81/
+Failed: error XXX at offset 20: XXX
+
+
+/\80/
+Failed: error XXX at offset 3: XXX
+
+/A\8B\9C/
+Failed: error XXX at offset 3: XXX
+
+
+
+# These are some patterns that used to cause buffer overflows or other errors
+# while compiling.
+
+
+
+/(\9*+(?2);\3++()2|)++{/
+Failed: error XXX at offset 3: XXX
+
+/\V\x85\9*+((?2)\3++()2)*:2/
+Failed: error XXX at offset 8: XXX
+
+
+
+
+
+"(?=!((?2)(?))({8(?<=(?1){29}8bbbb\x16\xd\xc6^($(\xa9H4){4}h}?1)B))\x15')"
+Failed: error XXX at offset 69: XXX
+
+/A(?'')Z/
+Failed: error XXX at offset 5: XXX
+
+
+/(?<=|(\,\$(?73591620449005828816)\xa8.{7}){6}\x09)/
+Failed: error XXX at offset 32: XXX
+
+
+/[[:>:]](?<)/
+Failed: error XXX at offset 11: XXX
+
+/((?x)(*:0))#(?'/
+Failed: error XXX at offset 15: XXX
+
+/(?C$[$)(?<]/
+Failed: error XXX at offset 3: XXX
+
+/(?C$)$)(?<]/
+Failed: error XXX at offset 3: XXX
+
+
+/((?x)(?#))#(?'/
+Failed: error XXX at offset 14: XXX
+
+
+/[[:\\](?<[::]/
+Failed: error XXX at offset 10: XXX
+
+
+"[[[.\xe8Nq\xffq\xff\xe0\x2|||::Nq\xffq\xff\xe0\x6\x2|||::[[[:[::::::[[[[[::::::::[:[[[:[:::[[[[[[[[[[[[:::::::::::::::::[[.\xe8Nq\xffq\xff\xe0\x2|||::Nq\xffq\xff\xe0\x6\x2|||::[[[:[::::::[[[[[::::::::[:[[[:[:::[[[[[[[[[[[[[[:::E[[[:[:[[:[:::[[:::E[[[:[:[[:'[:::::E[[[:[::::::[[[:[[[[[[[::E[[[:[::::::[[[:[[[[[[[[:[[::[::::[[:::::::[[:[[[[[[[:[[::[:[[:[~"
+Failed: error XXX at offset 1: XXX
+
+
+/(?R-:(?</
+Error: Sequence (?R) not terminated in regex m/(?R-:(?</ at (eval 267) line 1, <INFILE> line 1836.
+
+/(?R-:(?<)/
+Error: Sequence (?R) not terminated in regex m/(?R-:(?<)/ at (eval 268) line 1, <INFILE> line 1838.
+
+/(?(?C{\Q})(?!(?'/
+Failed: error XXX at offset 4: XXX
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/(?(8000000000/
+Failed: error XXX at offset 3: XXX
+
+/((?(R8000000000)))/
+Failed: error XXX at offset 6: XXX
+
+
+/(?(1)()\983040\2)/
+Failed: error XXX at offset 14: XXX
+
+/(*LIMIT_MATCH=)abc/
+Failed: error XXX at offset 15: XXX
+
+/(*CRLF)(*LIMIT_MATCH=)abc/
+Failed: error XXX at offset 7: XXX
+
+
+
+/(*MARK:a\zb)z/alt_verbnames
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 275) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 275) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 275) line 1, at end of line
+Unknown regexp modifier "/v" at (eval 275) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 275) line 1, at end of line
+Unknown regexp modifier "/r" at (eval 275) line 1, at end of line
+Unknown regexp modifier "/b" at (eval 275) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 275) line 1, at end of line
+
+/(*:ab\t(d\)c)xxx/
+Failed: error XXX at offset 13: XXX
+
+
+
+
+
+
+
+
+
+/(*:abc\Qpqr)/alt_verbnames
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 277) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 277) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 277) line 1, at end of line
+Unknown regexp modifier "/v" at (eval 277) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 277) line 1, at end of line
+Unknown regexp modifier "/r" at (eval 277) line 1, at end of line
+Unknown regexp modifier "/b" at (eval 277) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 277) line 1, at end of line
+
+
+
+
+
+
+
+#if !ebcdic
+
+
+
+#endif
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+#if !ebcdic
+
+
+
+
+#endif
+
+
+
+
+
+
+
+
+
+
+/((p(?'K/
+Failed: error XXX at offset 7: XXX
+
+/((p(?'K/no_auto_capture
+Failed: error XXX at offset 7: XXX
+
+
+/(?<!a{65535}a{5})x/I
+Error: Lookbehind longer than 255 not implemented in regex m/(?<!a{65535}a{5})x/ at (eval 280) line 1, <INFILE> line 1937.
+
+
+    
+
+/(?'abcdefghijklmnopqrstuvwxyzABCDEFGabcdefghijklmnopqrstuvwxyzABCDEabcdefghijklmnopqrstuvwxyzABCDEabcdefghijklmnopqrstuvwxyzABCDEFGH'toolong)/
+
+
+# These two use zero-termination
+/abcd/max_pattern_length=3
+Error: Unknown regexp modifier "/_" at (eval 282) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 282) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 282) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 282) line 1, at end of line
+Unknown regexp modifier "/r" at (eval 282) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 282) line 1, at end of line
+Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 282) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 282) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 282) line 1, at end of line
+Unknown regexp modifier "/h" at (eval 282) line 1, at end of line
+(eval 282) has too many errors.
+
+
+# These two, being hex, pass the length
+/abcdefab/hex,max_pattern_length=3
+Error: Unknown regexp modifier "/_" at (eval 283) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 283) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 283) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 283) line 1, at end of line
+Unknown regexp modifier "/r" at (eval 283) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 283) line 1, at end of line
+Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 283) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 283) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 283) line 1, at end of line
+Unknown regexp modifier "/h" at (eval 283) line 1, at end of line
+(eval 283) has too many errors.
+
+
+# Test compiled length limit
+/(abcdefg){10}/max_pattern_compiled_length=100
+Error: Unknown regexp modifier "/_" at (eval 284) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 284) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 284) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 284) line 1, at end of line
+Unknown regexp modifier "/r" at (eval 284) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 284) line 1, at end of line
+Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 284) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 284) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 284) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 284) line 1, at end of line
+(eval 284) has too many errors.
+
+# These patterns used to take a long time to compile
+
+
+
+
+"(?|()|())(?<=a()
+((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
+((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
+((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
+a)"xI
+Error: syntax error at (eval 285) line 5, near ""(?|()|())(?<=a()
+((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
+((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
+((?-2)(?-2))((?-2)(?-2))((?-2)(?-2))
+a)"xI
+"
+Execution of (eval 285) aborted due to compilation errors.
+
+# Test the use of malloc for caching group information when there are more
+# groups than fit into the on-stack workspace.
+
+
+# Test minlength capped at 65535
+
+
+# Test group scans when numbers are not unique
+
+
+
+
+
+# Test CRLF handling in empty string substitutions
+
+
+
+
+
+
+
+
+
+
+
+
+
+#if !ebcdic
+
+
+#endif
+
+# Tests for NULL characters in comments and verb "names" and callouts
+
+# /A#B\x00C\x0aZ/
+
+# /A+#B\x00C\x0a+/
+
+# /A(*:B\x00W#X\00Y\x0aC)Z/
+
+# /A(*:B\x00W#X\00Y\x0aC)Z/
+
+# /A(?C{X\x00Y})B/
+
+# /A(?#X\x00Y)B/
+
+# Tests for leading comment in extended patterns
+
+
+
+
+
+/(8(*:6^\x09x\xa6l\)6!|\xd0:[^:|)\x09d\Z\d{85*m(?'(?<1!)*\W[*\xff]!!h\w]*\xbe;/alt_bsux,alt_verbnames,allow_empty_class,dollar_endonly,extended,multiline,never_utf,no_dotstar_anchor,no_start_optimize
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 286) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 286) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 286) line 1, at end of line
+Unknown regexp modifier "/b" at (eval 286) line 1, at end of line
+Regexp modifiers "/a" and "/u" are mutually exclusive at (eval 286) line 1, at end of line
+Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 286) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 286) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 286) line 1, at end of line
+Unknown regexp modifier "/v" at (eval 286) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 286) line 1, at end of line
+(eval 286) has too many errors.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/(?J)(?'a'))(?'a')/
+Failed: error XXX at offset 3: XXX
+
+
+
+
+# Hex uses pattern length, not zero-terminated. This tests for overrunning
+# the given length of a pattern.
+
+/'(*U'/hex
+Failed: error XXX at offset 3: XXX
+
+/'(*'/hex
+Failed: error XXX at offset 2: XXX
+
+/'('/hex
+Failed: error XXX at offset 1: XXX
+
+
+# These tests are here because Perl never allows a back reference in a
+# lookbehind. PCRE2 supports some limited cases.
+
+
+/(?|([ab]))...(?<=\1)z/
+Error: Lookbehind longer than 255 not implemented in regex m/(?|([ab]))...(?<=\1)z/ at (eval 291) line 1, <INFILE> line 2054.
+
+
+/(a\2)(b\1)(?<=\2)/
+Error: Lookbehind longer than 255 not implemented in regex m/(a\2)(b\1)(?<=\2)/ at (eval 292) line 1, <INFILE> line 2057.
+
+
+/(?<A>[ab])...(?<=\k'A')(?<A>)z/dupnames
+Error: Lookbehind longer than 255 not implemented in regex m/(?<A>[ab])...(?<=\k'A')(?<A>)z/ at (eval 293) line 1, <INFILE> line 2060.
+
+# Perl does not support \g+n
+
+
+
+
+# Perl accepts these, but gives a warning. We can't warn, so give an error.
+
+/[a-[:digit:]]+/
+    a-a9-a
+ 0: a-a9-a
+
+/[A-[:digit:]]+/
+    A-A9-A
+ 0: A-A9-A
+
+/[a-\d]+/
+    a-a9-a
+ 0: a-a9-a
+
+
+
+
+/()(?<=(?0))/
+Error: Lookbehind longer than 255 not implemented in regex m/()(?<=(?0))/ at (eval 303) line 1, <INFILE> line 2081.
+
+
+
+
+/.>*?\g'0/use_length
+Failed: error XXX at offset 6: XXX
+
+/.>*?\g'0/
+Failed: error XXX at offset 6: XXX
+
+
+
+"(?(?C))"
+Failed: error XXX at offset 4: XXX
+
+/(?(?(?(?(?(?))))))/
+Failed: error XXX at offset 4: XXX
+
+
+/(*:ab)*/
+
+
+
+
+
+
+
+
+# This one is here because Perl gives an 'unmatched )' error which goes away
+# if one of the \) sequences is removed - which is weird. PCRE finds it too
+# complicated to find a minimum matching length.
+
+
+# This checks that new code for handling groups that may match an empty string
+# works on a very large number of alternatives. This pattern used to provoke a
+# complaint that it was too complicated.
+
+
+# This one used to compile rubbish instead of a compile error, and then
+# behave unpredictably at match time.
+
+/.+(?(?C'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'))?!XXXX.=X/
+Failed: error XXX at offset 6: XXX
+
+/[:[:alnum:]-[[a:lnum:]+/
+
+/((?(?C'')\QX\E(?!((?(?C'')(?!X=X));=)r*X=X));=)/
+Failed: error XXX at offset 5: XXX
+
+
+
+/()(\g+65534)/
+Failed: error XXX at offset 5: XXX
+
+/()(\g+65533)/
+Failed: error XXX at offset 5: XXX
+
+
+
+
+
+# This is here because Perl matches, even though a COMMIT is encountered
+# outside of the recursion.
+
+
+
+
+# This test differs from Perl for the first subject. Perl ends up with
+# $1 set to 'B'; PCRE2 has it unset (which I think is right).
+
+
+# The first of these, when run by Perl, gives the mark 'aa', which is wrong.
+
+
+
+
+
+
+/\g{3/
+Failed: error XXX at offset 4: XXX
+
+
+# Perl matches this one, but PCRE does not because (*ACCEPT) clears out any
+# pending backtracks in the recursion.
+
+
+# Perl gives no match for this one
+
+
+
+
+
+
+
+# Check auto-anchoring when there is a group that is never obeyed at
+# the start of a branch.
+
+
+
+# This should be anchored, as the condition is always false and there is
+# no alternative branch.
+
+
+# This should not be anchored.
+
+
+
+/(*LIMIT_HEAP=123/use_length
+Failed: error XXX at offset 16: XXX
+
+/(*LIMIT_MATCH=/use_length
+Failed: error XXX at offset 14: XXX
+
+/(*CRLF)(*LIMIT_DEPTH=/use_length
+Failed: error XXX at offset 7: XXX
+
+/(*CRLF)(*LIMIT_RECURSION=1)(*BOGUS/use_length
+Failed: error XXX at offset 7: XXX
+
+
+# ----------------------------------------------------------------------
+
+# These are a whole pile of tests that touch lines of code that are not
+# used by any other tests (at least when these were created).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ----------------------------------------------------------------------
+
+
+
+
+
+
+# Unsetting /x also unsets /xx
+
+
+
+# ----------------------------------------------------------------------
+# These test the dangerous PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL option.
+
+
+
+
+/[Q-\N]/B,bad_escape_is_literal
+Error: Unknown regexp modifier "/B" at (eval 319) line 1, at end of line
+Unknown regexp modifier "/b" at (eval 319) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 319) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 319) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 319) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 319) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 319) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 319) line 1, at end of line
+Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 319) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 319) line 1, at end of line
+(eval 319) has too many errors.
+
+/[\s-_]/bad_escape_is_literal
+Error: Unknown regexp modifier "/b" at (eval 320) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 320) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 320) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 320) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 320) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 320) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 320) line 1, at end of line
+Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 320) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 320) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 320) line 1, at end of line
+(eval 320) has too many errors.
+
+/[_-\s]/bad_escape_is_literal
+Error: Unknown regexp modifier "/b" at (eval 321) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 321) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 321) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 321) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 321) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 321) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 321) line 1, at end of line
+Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 321) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 321) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 321) line 1, at end of line
+(eval 321) has too many errors.
+
+/[\B\R\X]/B
+Error: Unknown regexp modifier "/B" at (eval 322) line 1, at end of line
+
+/[\B\R\X]/B,bad_escape_is_literal
+Error: Unknown regexp modifier "/B" at (eval 323) line 1, at end of line
+Unknown regexp modifier "/b" at (eval 323) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 323) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 323) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 323) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 323) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 323) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 323) line 1, at end of line
+Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 323) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 323) line 1, at end of line
+(eval 323) has too many errors.
+
+/[A-\BP-\RV-\X]/B
+Error: Unknown regexp modifier "/B" at (eval 324) line 1, at end of line
+
+/[A-\BP-\RV-\X]/B,bad_escape_is_literal
+Error: Unknown regexp modifier "/B" at (eval 325) line 1, at end of line
+Unknown regexp modifier "/b" at (eval 325) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 325) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 325) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 325) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 325) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 325) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 325) line 1, at end of line
+Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 325) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 325) line 1, at end of line
+(eval 325) has too many errors.
+
+# ----------------------------------------------------------------------
+
+
+
+
+
+
+//literal,extended
+Error: Unknown regexp modifier "/t" at (eval 326) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 326) line 1, at end of line
+Unknown regexp modifier "/r" at (eval 326) line 1, at end of line
+Regexp modifiers "/l" and "/a" are mutually exclusive at (eval 326) line 1, at end of line
+Regexp modifier "/l" may not appear twice at (eval 326) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 326) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 326) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 326) line 1, at end of line
+Regexp modifiers "/l" and "/d" are mutually exclusive at (eval 326) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 326) line 1, at end of line
+(eval 326) has too many errors.
+
+
+
+
+
+
+# Confirm that the pcre2_set_optimize API does not have any undesired effect on literal patterns
+
+
+
+# These should result in errors, since it is not permitted to use the
+# PCRE2_NO_AUTO_POSSESS and PCRE2_NO_DOTSTAR_ANCHOR options on a literal pattern
+/(cat)|dog/literal,no_auto_possess
+Error: Unknown regexp modifier "/t" at (eval 327) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 327) line 1, at end of line
+Unknown regexp modifier "/r" at (eval 327) line 1, at end of line
+Regexp modifiers "/l" and "/a" are mutually exclusive at (eval 327) line 1, at end of line
+Regexp modifier "/l" may not appear twice at (eval 327) line 1, at end of line
+
+/(cat)|dog/literal,no_dotstar_anchor
+Error: Unknown regexp modifier "/t" at (eval 328) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 328) line 1, at end of line
+Unknown regexp modifier "/r" at (eval 328) line 1, at end of line
+Regexp modifiers "/l" and "/a" are mutually exclusive at (eval 328) line 1, at end of line
+Regexp modifier "/l" may not appear twice at (eval 328) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 328) line 1, at end of line
+Regexp modifiers "/l" and "/d" are mutually exclusive at (eval 328) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 328) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 328) line 1, at end of line
+Regexp modifiers "/l" and "/a" are mutually exclusive at (eval 328) line 1, at end of line
+(eval 328) has too many errors.
+
+
+# Perl gets this wrong, failing to capture 'b' in group 1.
+
+    
+# And again here, for the "babc" subject string. 
+
+
+/[[:digit:]-a]/
+
+/[[:digit:]-[:print:]]/
+
+/[\d-a]/
+
+/[\H-z]/
+
+/[\d-[:print:]]/
+
+# Perl gets the second of these wrong, giving no match.
+
+
+    
+# JIT does not support callout_extra  
+    
+    
+
+
+
+
+    
+# These tests are matched in test 1 as they are Perl compatible. Here we are
+# looking at what does and does not get auto-possessified. 
+
+
+    
+
+
+
+
+
+
+# Perl behaves differently with these when optimization is turned off
+
+
+
+/(?^x-i)AB/ 
+Failed: error XXX at offset 5: XXX
+
+/(?^-i)AB/ 
+Failed: error XXX at offset 4: XXX
+
+/(?x-i-i)/
+Failed: error XXX at offset 6: XXX
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/(?(*ACCEPT)xxx)/
+Failed: error XXX at offset 4: XXX
+
+/(?(*atomic:xx)xxx)/
+Failed: error XXX at offset 4: XXX
+
+/(?(*script_run:xxx)zzz)/
+Failed: error XXX at offset 4: XXX
+
+
+
+
+
+
+
+
+/\[()]{65535}()/expand
+Error: Unknown regexp modifier "/e" at (eval 340) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 340) line 1, at end of line
+
+/\[()]{65535}(?<A>)/expand
+Error: Unknown regexp modifier "/e" at (eval 341) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 341) line 1, at end of line
+
+
+
+
+/(*:\)?/
+
+/(*:\Q \E){5}/alt_verbnames
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 343) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 343) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 343) line 1, at end of line
+Unknown regexp modifier "/v" at (eval 343) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 343) line 1, at end of line
+Unknown regexp modifier "/r" at (eval 343) line 1, at end of line
+Unknown regexp modifier "/b" at (eval 343) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 343) line 1, at end of line
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Addition overflow
+/( {32742} {42})(?<!\1{65481})/
+Error: Lookbehind longer than 255 not implemented in regex m/( {32742} {42})(?<!\1{65481})/ at (eval 344) line 1, <INFILE> line 2412.
+
+# Multiplication overflow
+/(X{65535})(?<=\1{32770})/
+Error: Lookbehind longer than 255 not implemented in regex m/(X{65535})(?<=\1{32770})/ at (eval 345) line 1, <INFILE> line 2415.
+
+# ---- Non-atomic assertion tests ----
+
+# Expect error: not allowed as a condition
+/(?(*napla:xx)bc)/
+Failed: error XXX at offset 4: XXX
+
+
+
+
+
+    
+    
+ 
+
+
+
+
+
+
+
+    
+    
+
+
+
+# ----
+
+# Expect error (recursion => not fixed length)
+/(\2)((?=(?<=\1)))/
+Error: Lookbehind longer than 255 not implemented in regex m/(\2)((?=(?<=\1)))/ at (eval 347) line 1, <INFILE> line 2444.
+
+
+
+    
+   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     
+
+
+
+
+
+
+    
+
+
+
+
+
+# Expect non-fixed-length error
+
+"(?<=X(?(DEFINE)(.*))(?1))."
+Error: Lookbehind longer than 255 not implemented in regex m/(?<=X(?(DEFINE)(.*))(?1))./ at (eval 348) line 1, <INFILE> line 2486.
+
+#if !ebcdic
+
+
+
+
+
+#loadtables ./testbtables
+** Warning: #-command ignored: #loadtables ./testbtables
+
+
+#endif
+
+
+
+/(?(VERSION=0.0/
+Failed: error XXX at offset 4: XXX
+
+# Perl has made \K in lookarounds an error. PCRE2 now rejects as well, unless
+# explicitly authorized.
+
+/(?=a\Kb)ab/
+Failed: error XXX at offset 6: XXX
+
+
+/(?!a\Kb)ac/
+Failed: error XXX at offset 6: XXX
+
+    
+/^abc(?<=b\Kc)d/
+Failed: error XXX at offset 11: XXX
+
+
+/^abc(?<!b\Kq)d/
+Failed: error XXX at offset 11: XXX
+
+    
+# --------- 
+
+# Tests for zero-length NULL to be treated as an empty string.
+
+
+
+
+
+# --------- 
+
+
+
+
+    
+# Check imposition of maximum by match_data_create().
+
+
+# Use recurse to test \K and Mark in atomic scope.
+
+    
+# Check use of NULL pattern with zero length.
+
+    
+//null_pattern
+Error: Regexp modifiers "/u" and "/l" are mutually exclusive at (eval 354) line 1, at end of line
+Regexp modifiers "/u" and "/l" are mutually exclusive at (eval 354) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 354) line 1, at end of line
+Regexp modifiers "/u" and "/a" are mutually exclusive at (eval 354) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 354) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 354) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 354) line 1, at end of line
+Unknown regexp modifier "/r" at (eval 354) line 1, at end of line
+
+/bad null pattern/null_pattern,use_length
+Error: Regexp modifiers "/u" and "/l" are mutually exclusive at (eval 355) line 1, at end of line
+Regexp modifiers "/u" and "/l" are mutually exclusive at (eval 355) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 355) line 1, at end of line
+Regexp modifiers "/u" and "/a" are mutually exclusive at (eval 355) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 355) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 355) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 355) line 1, at end of line
+Unknown regexp modifier "/r" at (eval 355) line 1, at end of line
+Regexp modifier "/u" may not appear twice at (eval 355) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 355) line 1, at end of line
+(eval 355) has too many errors.
+
+/bad null pattern/null_pattern
+Error: Regexp modifiers "/u" and "/l" are mutually exclusive at (eval 356) line 1, at end of line
+Regexp modifiers "/u" and "/l" are mutually exclusive at (eval 356) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 356) line 1, at end of line
+Regexp modifiers "/u" and "/a" are mutually exclusive at (eval 356) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 356) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 356) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 356) line 1, at end of line
+Unknown regexp modifier "/r" at (eval 356) line 1, at end of line
+
+# -------- Variable length lookbehinds --------
+/12345(?<=\d{1,256})X/
+Error: Lookbehind longer than 255 not implemented in regex m/12345(?<=\d{1,256})X/ at (eval 357) line 1, <INFILE> line 2548.
+
+
+/12345(?<=a?bc)X/max_varlookbehind=0
+Error: Unknown regexp modifier "/_" at (eval 358) line 1, at end of line
+Unknown regexp modifier "/v" at (eval 358) line 1, at end of line
+Unknown regexp modifier "/r" at (eval 358) line 1, at end of line
+Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 358) line 1, at end of line
+Unknown regexp modifier "/k" at (eval 358) line 1, at end of line
+Unknown regexp modifier "/b" at (eval 358) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 358) line 1, at end of line
+Unknown regexp modifier "/h" at (eval 358) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 358) line 1, at end of line
+
+
+/(?<!( {65054}){9,44965})/
+Error: Lookbehind longer than 255 not implemented in regex m/(?<!( {65054}){9,44965})/ at (eval 359) line 1, <INFILE> line 2554.
+
+
+
+# --------
+
+
+/(?<!( {65054}){0,44965})/auto_callout
+Error: Lookbehind longer than 255 not implemented in regex m/(?<!( {65054}){0,44965})/ at (eval 360) line 1, <INFILE> line 2561.
+
+/A+{,3}/
+Failed: error XXX at offset 3: XXX
+
+
+# This doesn't work in Perl (though I think it used to)
+
+    
+# These are different to Perl because of the different capturing in repeating
+# groups.
+
+
+
+
+
+# --------
+
+
+
+
+
+
+
+
+# This matches a character that only exists once in the subject, sort of like a
+# hypothetical "(.)(?<!\1.+)(?!.*\1)". That has unlimited variable length
+# lookbehind, so is invalid. This pattern doesn't work in Perl 5.38.0.
+
+
+
+
+
+
+
+
+
+    
+
+
+
+    
+# This test is crashing Perl 5.38.2.
+
+
+
+
+# The behaviour of these tests is different from Perl because PCRE2 doesn't
+# recognize \Q or \E within a quantifier, so these examples are not treated
+# as quantifiers. Subsequent processing of the string removes the escapes.
+
+    
+    
+# --------------
+
+
+
+
+
+# Tests for scan substring, a non Perl feature of PCRE2
+
+# Parse errors first
+
+/(*scs:/
+Failed: error XXX at offset 6: XXX
+
+/(*scan_substring:(/
+Failed: error XXX at offset 18: XXX
+
+/(*scs:('name'/
+Failed: error XXX at offset 13: XXX
+
+/(*scs:(1)a|b)/
+Failed: error XXX at offset 9: XXX
+
+/(*scs:(0)a)/
+Failed: error XXX at offset 9: XXX
+
+/(*scan_substring:(1)a|b)/
+Failed: error XXX at offset 20: XXX
+
+/(*scs:(<name>)a|b)/
+Failed: error XXX at offset 14: XXX
+
+/(*scan_substring:(<name>)a|b)/
+Failed: error XXX at offset 25: XXX
+
+/()(*scs:(1)+a)/
+Failed: error XXX at offset 11: XXX
+
+/()(*scs:(1,1,1,1,1,1,1,1,2))/
+Failed: error XXX at offset 27: XXX
+
+/()()(*scs:(1,2,1,2,1,2,2,'XYZ'))/
+Failed: error XXX at offset 31: XXX
+
+# Tests for iterating scan_substring
+
+
+
+
+
+
+
+
+
+
+
+
+
+/(\w++)=(?(*scs:(1)(abc))pqr|xyz)(\w++)/
+Failed: error XXX at offset 11: XXX
+
+# Tests for scan_substring
+
+    ##string##next!##
+Error: syntax error at (eval 374) line 1, at EOF
+Execution of (eval 374) aborted due to compilation errors.
+
+        ##
+Error: syntax error at (eval 375) line 1, at EOF
+Execution of (eval 375) aborted due to compilation errors.
+
+
+
+    ##abABCtuTUVXz##abCDEFGxyCDEEFGhi##
+Error: syntax error at (eval 376) line 1, at EOF
+Execution of (eval 376) aborted due to compilation errors.
+
+    ##cdefgh##cdeabxy##
+Error: syntax error at (eval 377) line 1, at EOF
+Execution of (eval 377) aborted due to compilation errors.
+
+    ##cdefgh##cdeabxy##
+Error: syntax error at (eval 378) line 1, at EOF
+Execution of (eval 378) aborted due to compilation errors.
+
+    ##xyz##abc##!
+Error: syntax error at (eval 379) line 1, at EOF
+Execution of (eval 379) aborted due to compilation errors.
+
+    ##abc##abc##!
+Error: syntax error at (eval 380) line 1, at EOF
+Execution of (eval 380) aborted due to compilation errors.
+
+    ##abc##abc##!
+Error: syntax error at (eval 381) line 1, at EOF
+Execution of (eval 381) aborted due to compilation errors.
+
+  
+      
+
+
+
+
+
+
+
+
+
+# Custom backtrack, goes back n - 1 characters in the input (n=8)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Relative reference
+
+
+
+
+
+
+
+# List of captures
+
+
+
+
+
+
+
+# Duplicated capture references
+
+
+
+
+
+# Tests for pcre2_set_optimize()
+
+
+
+
+
+
+# If pcre2_set_optimize() is used to turn on some optimization, but at the same time,
+# the compile options word turns it off... the compile options word "wins":
+
+
+
+
+# --------------
+
+# larger than GROUP_MAX, smaller than INT_MAX
+/a\800000b/
+Failed: error XXX at offset 8: XXX
+
+# coming up on INT_MAX... (used to succeed with \8 being literal 8)
+/a\800000000b/
+Failed: error XXX at offset 11: XXX
+
+# over INT_MAX (used to succeed with \8 being literal 8)
+/a\8000000000b/
+Failed: error XXX at offset 12: XXX
+
+# --------------
+
+# no_bs0
+
+
+/a\0b/no_bs0
+Error: Unknown regexp modifier "/_" at (eval 385) line 1, at end of line
+Unknown regexp modifier "/b" at (eval 385) line 1, at end of line
+Unknown regexp modifier "/0" at (eval 385) line 1, at end of line
+
+
+
+
+# python_octal
+
+#if !ebcdic
+
+
+/\1/
+Failed: error XXX at offset 2: XXX
+
+
+
+
+/\1/python_octal
+Failed: error XXX at offset 2: XXX
+
+/\12/python_octal
+Error: Unknown regexp modifier "/y" at (eval 388) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 388) line 1, at end of line
+Unknown regexp modifier "/h" at (eval 388) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 388) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 388) line 1, at end of line
+Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 388) line 1, at end of line
+
+
+#endif
+
+# --------------
+
+
+/a(?C)b/never_callout
+Failed: error XXX at offset 4: XXX
+
+# --------------
+
+# EXTENDED CHARACTER CLASSES (UTS#18)
+
+
+/[a[]/alt_extended_class
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 390) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 390) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 390) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 390) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 390) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 390) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 390) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 390) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 390) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 390) line 1, at end of line
+(eval 390) has too many errors.
+
+/[a[B]/alt_extended_class
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 391) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 391) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 391) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 391) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 391) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 391) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 391) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 391) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 391) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 391) line 1, at end of line
+(eval 391) has too many errors.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/[a--/alt_extended_class
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 392) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 392) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 392) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 392) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 392) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 392) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 392) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 392) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 392) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 392) line 1, at end of line
+(eval 392) has too many errors.
+
+/[a--a/alt_extended_class
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 393) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 393) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 393) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 393) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 393) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 393) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 393) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 393) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 393) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 393) line 1, at end of line
+(eval 393) has too many errors.
+
+/[a--[a/alt_extended_class
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 394) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 394) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 394) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 394) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 394) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 394) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 394) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 394) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 394) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 394) line 1, at end of line
+(eval 394) has too many errors.
+
+/[a--[a]/alt_extended_class
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 395) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 395) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 395) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 395) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 395) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 395) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 395) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 395) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 395) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 395) line 1, at end of line
+(eval 395) has too many errors.
+
+/[a--[a]--/alt_extended_class
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 396) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 396) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 396) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 396) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 396) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 396) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 396) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 396) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 396) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 396) line 1, at end of line
+(eval 396) has too many errors.
+
+/[a--]/alt_extended_class
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 397) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 397) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 397) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 397) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 397) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 397) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 397) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 397) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 397) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 397) line 1, at end of line
+(eval 397) has too many errors.
+
+/[--a]/alt_extended_class
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 398) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 398) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 398) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 398) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 398) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 398) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 398) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 398) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 398) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 398) line 1, at end of line
+(eval 398) has too many errors.
+
+/[^--a]/alt_extended_class
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 399) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 399) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 399) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 399) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 399) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 399) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 399) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 399) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 399) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 399) line 1, at end of line
+(eval 399) has too many errors.
+
+/[--]/alt_extended_class
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 400) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 400) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 400) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 400) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 400) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 400) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 400) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 400) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 400) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 400) line 1, at end of line
+(eval 400) has too many errors.
+
+/[a---b]/alt_extended_class
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 401) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 401) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 401) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 401) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 401) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 401) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 401) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 401) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 401) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 401) line 1, at end of line
+(eval 401) has too many errors.
+
+/[a----b]/alt_extended_class
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 402) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 402) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 402) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 402) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 402) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 402) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 402) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 402) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 402) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 402) line 1, at end of line
+(eval 402) has too many errors.
+
+/[a&&&b]/alt_extended_class
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 403) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 403) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 403) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 403) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 403) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 403) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 403) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 403) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 403) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 403) line 1, at end of line
+(eval 403) has too many errors.
+
+/[a|||b]/alt_extended_class
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 404) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 404) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 404) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 404) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 404) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 404) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 404) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 404) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 404) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 404) line 1, at end of line
+(eval 404) has too many errors.
+
+/[a~~~b]/alt_extended_class
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 405) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 405) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 405) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 405) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 405) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 405) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 405) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 405) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 405) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 405) line 1, at end of line
+(eval 405) has too many errors.
+
+/[a~~~~b]/alt_extended_class
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 406) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 406) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 406) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 406) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 406) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 406) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 406) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 406) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 406) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 406) line 1, at end of line
+(eval 406) has too many errors.
+
+/[a~~/alt_extended_class
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 407) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 407) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 407) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 407) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 407) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 407) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 407) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 407) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 407) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 407) line 1, at end of line
+(eval 407) has too many errors.
+
+/[a~~~/alt_extended_class
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 408) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 408) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 408) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 408) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 408) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 408) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 408) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 408) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 408) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 408) line 1, at end of line
+(eval 408) has too many errors.
+
+/[a~~~~/alt_extended_class
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 409) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 409) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 409) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 409) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 409) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 409) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 409) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 409) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 409) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 409) line 1, at end of line
+(eval 409) has too many errors.
+
+/[a||b&&c]/alt_extended_class
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 410) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 410) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 410) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 410) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 410) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 410) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 410) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 410) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 410) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 410) line 1, at end of line
+(eval 410) has too many errors.
+
+/[a||b~~c]/alt_extended_class
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 411) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 411) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 411) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 411) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 411) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 411) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 411) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 411) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 411) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 411) line 1, at end of line
+(eval 411) has too many errors.
+
+/[a~~b&&c]/alt_extended_class
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 412) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 412) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 412) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 412) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 412) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 412) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 412) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 412) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 412) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 412) line 1, at end of line
+(eval 412) has too many errors.
+
+/[a--b~~c]/alt_extended_class
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 413) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 413) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 413) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 413) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 413) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 413) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 413) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 413) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 413) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 413) line 1, at end of line
+(eval 413) has too many errors.
+
+/[a--b&&c]/alt_extended_class
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 414) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 414) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 414) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 414) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 414) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 414) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 414) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 414) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 414) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 414) line 1, at end of line
+(eval 414) has too many errors.
+
+/[a||b--c]/alt_extended_class
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 415) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 415) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 415) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 415) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 415) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 415) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 415) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 415) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 415) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 415) line 1, at end of line
+(eval 415) has too many errors.
+
+
+/[\d-z]/B,alt_extended_class
+Error: Unknown regexp modifier "/B" at (eval 416) line 1, at end of line
+Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 416) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 416) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 416) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 416) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 416) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 416) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 416) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 416) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 416) line 1, at end of line
+(eval 416) has too many errors.
+
+/[z-\d]/B,alt_extended_class
+Error: Unknown regexp modifier "/B" at (eval 417) line 1, at end of line
+Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 417) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 417) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 417) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 417) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 417) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 417) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 417) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 417) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 417) line 1, at end of line
+(eval 417) has too many errors.
+
+
+
+/[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[z]&&a]]]]]]]]]]]]]]]/alt_extended_class
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 418) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 418) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 418) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 418) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 418) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 418) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 418) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 418) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 418) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 418) line 1, at end of line
+(eval 418) has too many errors.
+
+/[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a[b]&&a[a&&a[z]]]]]]]]]]]]]]]]/alt_extended_class
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 419) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 419) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 419) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 419) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 419) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 419) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 419) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 419) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 419) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 419) line 1, at end of line
+(eval 419) has too many errors.
+
+/[z&/alt_extended_class
+Error: Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 420) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 420) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 420) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 420) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 420) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 420) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 420) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 420) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 420) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 420) line 1, at end of line
+(eval 420) has too many errors.
+
+
+
+# --------------
+
+# EXTENDED CHARACTER CLASSES (Perl)
+
+# allow-empty-class does nothing inside (?[...])
+
+# bad-escape-is-literal does nothing inside (?[...])
+/[ \j ]/
+
+/[ /\
+Failed: error XXX at offset 1: XXX
+
+/(?[ \j ])/
+Failed: error XXX at offset 6: XXX
+
+/(?[ /\
+Failed: error XXX at offset 4: XXX
+
+
+/[ /\bad_escape_is_literal
+Failed: error XXX at offset 1: XXX
+
+/(?[ \j ])/bad_escape_is_literal
+Error: Unknown regexp modifier "/b" at (eval 426) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 426) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 426) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 426) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 426) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 426) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 426) line 1, at end of line
+Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 426) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 426) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 426) line 1, at end of line
+(eval 426) has too many errors.
+
+/(?[ /\bad_escape_is_literal
+Failed: error XXX at offset 4: XXX
+
+/(?[ [\j] ])/bad_escape_is_literal
+Error: Unknown regexp modifier "/b" at (eval 428) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 428) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 428) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 428) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 428) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 428) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 428) line 1, at end of line
+Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 428) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 428) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 428) line 1, at end of line
+(eval 428) has too many errors.
+
+/(?[ (\j) ])/bad_escape_is_literal
+Error: Unknown regexp modifier "/b" at (eval 429) line 1, at end of line
+Regexp modifiers "/a" and "/d" are mutually exclusive at (eval 429) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 429) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 429) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 429) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 429) line 1, at end of line
+Unknown regexp modifier "/_" at (eval 429) line 1, at end of line
+Regexp modifiers "/a" and "/l" are mutually exclusive at (eval 429) line 1, at end of line
+Unknown regexp modifier "/t" at (eval 429) line 1, at end of line
+Unknown regexp modifier "/e" at (eval 429) line 1, at end of line
+(eval 429) has too many errors.
+
+# We can't test error cases in testinput1
+
+/(?[])/
+Failed: error XXX at offset 3: XXX
+
+/(?[/
+Failed: error XXX at offset 3: XXX
+
+/(?[]/
+Failed: error XXX at offset 4: XXX
+
+/(?[\n/
+Failed: error XXX at offset 5: XXX
+
+/(?[\n]/
+Failed: error XXX at offset 6: XXX
+
+/(?[\n]z)/
+Failed: error XXX at offset 6: XXX
+
+/(?[\n] )/
+Failed: error XXX at offset 6: XXX
+
+/(?[(/
+Failed: error XXX at offset 4: XXX
+
+/(?[( /
+Failed: error XXX at offset 5: XXX
+
+/(?[(\n/
+Failed: error XXX at offset 6: XXX
+
+/(?[ \n + () ])/
+Failed: error XXX at offset 11: XXX
+
+/(?[1])/
+Failed: error XXX at offset 4: XXX
+
+/(?[a])/
+Failed: error XXX at offset 4: XXX
+
+/(?[a-c])/
+Failed: error XXX at offset 4: XXX
+
+/(?[(])/
+Failed: error XXX at offset 4: XXX
+
+/(?[(\n])/
+Failed: error XXX at offset 6: XXX
+
+/(?[\n)])/
+Failed: error XXX at offset 6: XXX
+
+/(?[^\n])/
+Failed: error XXX at offset 4: XXX
+
+/(?[ \n \t ])/
+Failed: error XXX at offset 9: XXX
+
+/(?[ \d \t ])/
+Failed: error XXX at offset 9: XXX
+
+/(?[ [\n] \t ])/
+Failed: error XXX at offset 11: XXX
+
+/(?[ (\n) \t ])/
+Failed: error XXX at offset 11: XXX
+
+/(?[ [:alpha:] \t ])/
+Failed: error XXX at offset 16: XXX
+
+/(?[ \n + \t \d ])/
+Failed: error XXX at offset 14: XXX
+
+/(?[ !\n \t ])/
+Failed: error XXX at offset 10: XXX
+
+/(?[ \n [:alpha:] ])/
+Failed: error XXX at offset 16: XXX
+
+/(?[ \n [\d] ])/
+Failed: error XXX at offset 10: XXX
+
+/(?[ \n (\t) ])/
+Failed: error XXX at offset 8: XXX
+
+/(?[ \n !\t ])/
+Failed: error XXX at offset 10: XXX
+
+/(?[ \n \t ])/
+Failed: error XXX at offset 9: XXX
+
+/(?[:graph:])/
+Failed: error XXX at offset 4: XXX
+
+/(?[\Qn\E])/
+Failed: error XXX at offset 4: XXX
+
+# maximum depth tests
+
+
+/(?[\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+([\n]&\n))))))))))))))])/
+
+/(?[\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n&[\n]))))))))))))))])/
+
+/(?[\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+(\n+[a]&\n+((\n)&\n))))))))))))))])/
+
+# --------------
+
+/[[:digit:]   -Z]/xx
+
+/[\d   -Z]/xx
+
+/[[:digit:]\E-H]/
+
+/[[:digit:]\Q\E-H]+/
+
+/[z-[:space:]]/
+
+/[z-\d]/
+
+/[[:space:]-z]/
+
+/[\d-z]/
+
+/[\d-\w]/
+
+/[\Q/
+Failed: error XXX at offset 1: XXX
+
+/[\Q/\
+Failed: error XXX at offset 1: XXX
+
+/[\Q\E/
+Failed: error XXX at offset 1: XXX
+
+/[\Q\n/
+Failed: error XXX at offset 1: XXX
+
+/[\Q\n]/
+Failed: error XXX at offset 1: XXX
+
+/[\Q\n/\
+Failed: error XXX at offset 1: XXX
+
+/[\Q\n\]/
+Failed: error XXX at offset 1: XXX
+
+/[\Q\n\E/
+Failed: error XXX at offset 1: XXX
+
+
+/[z\Q/
+Failed: error XXX at offset 1: XXX
+
+/[z\Q/\
+Failed: error XXX at offset 1: XXX
+
+/[z\Q\E/
+Failed: error XXX at offset 1: XXX
+
+/[/\
+Failed: error XXX at offset 1: XXX
+
+/[\n/
+Failed: error XXX at offset 1: XXX
+
+/[\E/
+Failed: error XXX at offset 1: XXX
+
+
+
+
+#if !ebcdic
+
+
+#endif
+
+
+
+
+#if !ebcdic
+
+
+
+
+#endif
+
+/[\A]/
+
+/[\Z]/
+
+/[\z]/
+
+/[\G]/
+
+/[\K]/
+
+
+
+
+#if !ebcdic
+
+
+#endif
+
+# --------------
+
+# Attempt at full coverage of the substitution buffer-management code - not
+# just covering each line in each macro, but covering each instantiation of each
+# line in those macros.
+
+#
+# CHECKMEMCPY tests
+#
+# Four conditions for CHECKMEMCPY:
+#   no overflow;
+#   first overflow (with/without substitute_overflow_length);
+#   overflow after previous overflow
+# Additionally some CHECKMEMCPYs have a substitute_replacement_only branch.
+#
+
+# pre-start-offset fragment
+# no "overflow after previous overflow" condition
+
+# pre-match fragment
+
+# empty match bumpalong
+
+# literal replacement
+
+# a MARK
+
+# a subject fragment
+
+# a zero-length subject fragment
+
+#if !ebcdic
+
+# a data character via an escape
+
+#endif
+
+# a replacement literal character
+
+# a cancelled substitution
+# no "overflow after previous overflow" condition
+
+# the rest of the subject
+
+# the trailing NULL
+
+#
+# CHECKCASECPY tests
+#
+# The same four conditions for CHECKCASECPY as for CHECKMEMCPY:
+#   no overflow;
+#   first overflow (with/without substitute_overflow_length);
+#   overflow after previous overflow
+# Also the condition where CHECKCASECPY isn't called due to a custom callout
+#
+
+# a MARK
+
+# a subject fragment
+
+# a zero-length subject fragment
+
+#if !ebcdic
+
+# a data character via an escape
+
+#endif
+
+# a replacement literal character
+
+#
+# DELAYEDFORCECASE tests
+#
+# Some different triggering conditions for DELAYEDFORCECASE:
+#   no overflow;
+#   first overflow (with/without substitute_overflow_length);
+#   if there was a previous overflow, then the case callout can't be invoked
+# Also, the CASEERROR branch.
+# Also, the branch for where chars_outstanding is zero, both with and without
+#   a previous overflow.
+#
+
+# on set casing mode
+
+# trailing fragment
+
+#
+# do_case_copy tests
+#
+
+
+
+
+
+
+#
+# special test-callback case transformation tests
+#
+
+
+# --------------
+
+# Tests for recurse with returned captures
+
+# Parse error tests
+
+/(?1/
+Failed: error XXX at offset 3: XXX
+
+/(?1(/
+Failed: error XXX at offset 3: XXX
+
+/(?R(1/
+Error: Sequence (?R) not terminated in regex m/(?R(1/ at (eval 495) line 1, <INFILE> line 3212.
+
+/(?R(1,/
+Error: Sequence (?R) not terminated in regex m/(?R(1,/ at (eval 496) line 1, <INFILE> line 3214.
+
+/(?R0(1,2!/
+Error: Sequence (?R) not terminated in regex m/(?R0(1,2!/ at (eval 497) line 1, <INFILE> line 3216.
+
+/(?1(1,0))()/
+Failed: error XXX at offset 3: XXX
+
+/(?1(1,+2))()/
+Failed: error XXX at offset 3: XXX
+
+/(?1(<name>))/
+Failed: error XXX at offset 3: XXX
+
+# Operation tests
+
+
+
+
+
+        #
+Error: syntax error at (eval 501) line 1, at EOF
+Execution of (eval 501) aborted due to compilation errors.
+
+        #
+Error: syntax error at (eval 502) line 1, at EOF
+Execution of (eval 502) aborted due to compilation errors.
+
+
+  #axyb#axax#
+Error: syntax error at (eval 503) line 1, at EOF
+Execution of (eval 503) aborted due to compilation errors.
+
+
+
+
+  # returns the Sat/Sun prefix as \k<short>.
+Error: syntax error at (eval 504) line 1, at EOF
+Execution of (eval 504) aborted due to compilation errors.
+
+# Test each syntax used for recursion
+
+
+
+
+
+
+
+/(?(DEFINE)(?<fn>(?<ret>Sat)urday))\g<fn('ret')>,\k<ret>/
+Failed: error XXX at offset 36: XXX
+
+
+/(?(DEFINE)((Sat)urday))(?1()),\2/
+Failed: error XXX at offset 26: XXX
+
+
+# --------------
+
+# End of testinput2

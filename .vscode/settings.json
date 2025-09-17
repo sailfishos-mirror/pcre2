@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.in": "c"
+    }
+    ,
+    "editor.rulers": [80]
+}

@@ -1,0 +1,30 @@
++++
+title = "pcre2_serialize_free"
+aliases = ["/doc/html/pcre2_serialize_free.html"]
++++
+
+<h2>
+SYNOPSIS
+</h2>
+<p>
+<b>#include &#60;pcre2.h&#62;</b>
+</p>
+<p>
+<b>void pcre2_serialize_free(uint8_t *<i>bytes</i>);</b><br>
+
+</p>
+<h2>
+DESCRIPTION
+</h2>
+<p>
+This function frees the memory that was obtained by
+<b>pcre2_serialize_encode()</b> to hold a serialized byte stream. The argument
+must point to such a byte stream or be NULL, in which case the function returns
+without doing anything.
+</p>
+<p>
+There is a complete description of the PCRE2 native API in the
+<a href="../pcre2api/"><b>pcre2api</b></a>
+page and a description of the serialization functions in the
+<a href="../pcre2serialize/"><b>pcre2serialize</b></a>
+page.

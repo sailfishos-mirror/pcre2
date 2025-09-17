@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta name="generator" content="Hugo 0.139.4"><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+	<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+	<link rel="shortcut icon" href="/favicon.ico" />
+
+	<title>PCRE2 - Perl-Compatible Regular Expressions</title>
+
+	<link rel="stylesheet" href="/css/style.css" type="text/css" media="all" />
+	<link rel="stylesheet" href="/css/syntax.css" type="text/css" media="all" />
+
+	<meta name="theme-color" media="(prefers-color-scheme: light)" content="#0085cc" />
+	<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#33b8ff" />
+
+	<script src="/js/init-pagefind.js" type="module"></script>
+
+</head>
+
+<body>
+
+
+<header>
+<div class="header-content">
+
+    <nav>
+        <div class="nav-home" style="background: none;"></div>
+        <div class="nav-glue"></div>
+        <div class="nav-row nav-row-lhs">
+
+<div class="nav-menu" tabindex="0">
+    <div>Project</div>
+    <ul>
+        <li><a href="/project/authors/" title="Authorship and Contributors">AUTHORS</a></li>
+        <li><a href="/project/security/" title="Security policies">SECURITY</a></li>
+        <li><a href="/project/licence/" title="Licence">LICENCE</a></li>
+    </ul>
+</div>
+<div class="nav-menu" tabindex="0">
+    <div>Guides</div>
+    <ul>
+        <li><a href="/guide/readme/" title="General guidance">README</a></li>
+        <li><a href="/guide/non-autotools-build/" title="Building on platforms that don't use Autotools">NON-AUTOTOOLS-BUILD</a></li>
+    </ul>
+</div>
+
+<a class="nav-item" href="/doc/" title="Reference manual">Manual</a>
+
+</div>
+        <div class="nav-glue"></div>
+        <div class="nav-row nav-row-rhs">
+
+<search id="nav-search">
+    <input
+        type="text"
+        placeholder="Search the site…"
+        aria-label="Search through site content"
+        spellcheck="false"
+        autocomplete="off"
+        disabled />
+</search>
+<a class="nav-github" href="https://github.com/PCRE2Project/pcre2" title="PCRE2 on GitHub">
+    <svg viewBox="0 0 98 96" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z" /></svg>
+</a>
+
+</div>
+    </nav>
+
+    <div id="search-results" style="display:none">
+    <div></div>
+    <a id="search-clear"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM175 175c9.4-9.4 24.6-9.4 33.9 0l47 47 47-47c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-47 47 47 47c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-47-47-47 47c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l47-47-47-47c-9.4-9.4-9.4-24.6 0-33.9z"/></svg></a>
+</div>
+
+    <picture>
+        <source media="(prefers-color-scheme: dark)" inert width="1400" height="220" srcset="/images/pcre2-header-dark.svg">
+        <img alt="PCRE2: Perl-Compatible Regular Expressions" inert style="margin-left: -1.9%; width: 100%; height: auto;" width="1400" height="220" src="/images/pcre2-header-light.svg">
+    </picture>
+
+</div>
+</header>
+
+<section class="index-intro">
+<h2>Overview</h2>
+<div class="index-intro-content">
+
+    <div>
+    <div>
+    The PCRE2 library is a set of C functions that implement<br />
+    <strong>regular expression pattern matching</strong>.
+    </div>
+    </div>
+
+    <div>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M156.6 384.9L125.7 354c-8.5-8.5-11.5-20.8-7.7-32.2c3-8.9 7-20.5 11.8-33.8L24 288c-8.6 0-16.6-4.6-20.9-12.1s-4.2-16.7 .2-24.1l52.5-88.5c13-21.9 36.5-35.3 61.9-35.3l82.3 0c2.4-4 4.8-7.7 7.2-11.3C289.1-4.1 411.1-8.1 483.9 5.3c11.6 2.1 20.6 11.2 22.8 22.8c13.4 72.9 9.3 194.8-111.4 276.7c-3.5 2.4-7.3 4.8-11.3 7.2l0 82.3c0 25.4-13.4 49-35.3 61.9l-88.5 52.5c-7.4 4.4-16.6 4.5-24.1 .2s-12.1-12.2-12.1-20.9l0-107.2c-14.1 4.9-26.4 8.9-35.7 11.9c-11.2 3.6-23.4 .5-31.8-7.8zM384 168a40 40 0 1 0 0-80 40 40 0 1 0 0 80z"/></svg>
+    <div>
+    It is <strong>self-contained and portable</strong>, and designed to be <strong>easy to embed</strong> into existing projects and build systems, on almost <strong>any platform</strong> or build target.
+    </div>
+    </div>
+
+    <div>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M305.8 2.1C314.4 5.9 320 14.5 320 24l0 40 16 0c70.7 0 128 57.3 128 128l0 166.7c28.3 12.3 48 40.5 48 73.3c0 44.2-35.8 80-80 80s-80-35.8-80-80c0-32.8 19.7-61 48-73.3L400 192c0-35.3-28.7-64-64-64l-16 0 0 40c0 9.5-5.6 18.1-14.2 21.9s-18.8 2.3-25.8-4.1l-80-72c-5.1-4.6-7.9-11-7.9-17.8s2.9-13.3 7.9-17.8l80-72c7-6.3 17.2-7.9 25.8-4.1zM104 80A24 24 0 1 0 56 80a24 24 0 1 0 48 0zm8 73.3l0 205.3c28.3 12.3 48 40.5 48 73.3c0 44.2-35.8 80-80 80s-80-35.8-80-80c0-32.8 19.7-61 48-73.3l0-205.3C19.7 141 0 112.8 0 80C0 35.8 35.8 0 80 0s80 35.8 80 80c0 32.8-19.7 61-48 73.3zM104 432a24 24 0 1 0 -48 0 24 24 0 1 0 48 0zm328 24a24 24 0 1 0 0-48 24 24 0 1 0 0 48z"/></svg>
+    <div>
+    The PCRE2 library is <strong>free and open-source</strong> (BSD licence), and permitted in proprietary software.
+    </div>
+    </div>
+
+    <div>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zM288 96a32 32 0 1 0 -64 0 32 32 0 1 0 64 0zM256 416c35.3 0 64-28.7 64-64c0-17.4-6.9-33.1-18.1-44.6L366 161.7c5.3-12.1-.2-26.3-12.3-31.6s-26.3 .2-31.6 12.3L257.9 288c-.6 0-1.3 0-1.9 0c-35.3 0-64 28.7-64 64s28.7 64 64 64zM176 144a32 32 0 1 0 -64 0 32 32 0 1 0 64 0zM96 288a32 32 0 1 0 0-64 32 32 0 1 0 0 64zm352-32a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/></svg>
+    <div>
+    It supports Unicode matching and a very wide range of regular expression features. It accepts input in various character encodings, and optionally includes a highly <strong>performant JIT matching engine</strong>.
+    </div>
+    </div>
+
+    <div>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M256 0c4.6 0 9.2 1 13.4 2.9L457.7 82.8c22 9.3 38.4 31 38.3 57.2c-.5 99.2-41.3 280.7-213.6 363.2c-16.7 8-36.1 8-52.8 0C57.3 420.7 16.5 239.2 16 140c-.1-26.2 16.3-47.9 38.3-57.2L242.7 2.9C246.8 1 251.4 0 256 0zm0 66.8l0 378.1C394 378 431.1 230.1 432 141.4L256 66.8s0 0 0 0z"/></svg>
+    <div>
+    PCRE2 is <strong>mature and highly-trusted</strong>: bundled in dozens or hundreds of open-source and commercial products, such as Excel, Safari, Apache, and Git, and used as the basis for regular expressions in several programming languages including PHP and&nbsp;R.
+    </div>
+    </div>
+
+</div>
+</section>
+
+<main>
+<div class="main-content">
+    <h2 id="quickstart">Quickstart</h2>
+<picture>
+  <source media="(prefers-color-scheme: dark)" width="1574" height="1164" srcset="https://github.com/user-attachments/assets/1886bc4b-2e05-4827-af83-e4ed45f25ab1">
+  <img alt="Recording of a terminal session showing the PCRE2 quickstart; reproduced in text form below" style="width: 787px; height: auto;" width="1574" height="1164" class="pre" src="https://github.com/user-attachments/assets/7b90180e-276e-4202-b590-b72871cff91a">
+</picture>
+<details>
+<summary>Show script</summary>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl"><span class="c1"># Fetch PCRE2 with &#39;git clone&#39;, or use curl/wget to download a release.</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># Here, let&#39;s use git to check out a release tag:</span>
+</span></span><span class="line"><span class="cl">git clone https://github.com/PCRE2Project/pcre2.git ./pcre2 <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    --branch pcre2-<span class="nv">$PCRE2_VERSION</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    -c advice.detachedHead<span class="o">=</span><span class="nb">false</span> --depth <span class="m">1</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Now let&#39;s build PCRE2:</span>
+</span></span><span class="line"><span class="cl"><span class="o">(</span><span class="nb">cd</span> ./pcre2<span class="p">;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    cmake -G Ninja -DCMAKE_BUILD_TYPE<span class="o">=</span>Debug -B build<span class="p">;</span> <span class="se">\
+</span></span></span><span class="line"><span class="cl"><span class="se"></span>    cmake --build build/<span class="o">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Great, PCRE2 is built.</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Here&#39;s a quick little demo to show how we can make use of PCRE2.</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># For a fuller example, see &#39;./pcre2/src/pcre2demo.c&#39;.</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># See below for the demo code.</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Compile the demo:</span>
+</span></span><span class="line"><span class="cl">gcc -g -I./pcre2/build -L./pcre2/build demo.c -o demo -lpcre2-8
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># Finally, run our demo:</span>
+</span></span><span class="line"><span class="cl">./demo <span class="s1">&#39;c.t&#39;</span> <span class="s1">&#39;dogs and cats&#39;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1"># We fetched, built, and called PCRE2 successfully! :)</span>
+</span></span></code></pre></div><p>File <code>demo.c</code>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="line"><span class="cl"><span class="cm">/* Set PCRE2_CODE_UNIT_WIDTH to indicate we will use 8-bit input. */</span>
+</span></span><span class="line"><span class="cl"><span class="cp">#define PCRE2_CODE_UNIT_WIDTH 8
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;pcre2.h&gt;</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;string.h&gt; /* for strlen */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;  /* for printf */</span><span class="cp">
+</span></span></span><span class="line"><span class="cl"><span class="cp"></span>
+</span></span><span class="line"><span class="cl"><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[])</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">argc</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">&#34;Usage: %s &lt;pattern&gt; &lt;subject&gt;</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">pattern</span> <span class="o">=</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">subject</span> <span class="o">=</span> <span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* Compile the pattern. */</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">error_number</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">PCRE2_SIZE</span> <span class="n">error_offset</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">pcre2_code</span> <span class="o">*</span><span class="n">re</span> <span class="o">=</span> <span class="nf">pcre2_compile</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="n">pattern</span><span class="p">,</span>               <span class="cm">/* the pattern */</span>
+</span></span><span class="line"><span class="cl">        <span class="n">PCRE2_ZERO_TERMINATED</span><span class="p">,</span> <span class="cm">/* indicates pattern is zero-terminated */</span>
+</span></span><span class="line"><span class="cl">        <span class="mi">0</span><span class="p">,</span>                     <span class="cm">/* default options */</span>
+</span></span><span class="line"><span class="cl">        <span class="o">&amp;</span><span class="n">error_number</span><span class="p">,</span>         <span class="cm">/* for error number */</span>
+</span></span><span class="line"><span class="cl">        <span class="o">&amp;</span><span class="n">error_offset</span><span class="p">,</span>         <span class="cm">/* for error offset */</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">NULL</span><span class="p">);</span>                 <span class="cm">/* use default compile context */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">re</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">&#34;Invalid pattern: %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* Match the pattern against the subject text. */</span>
+</span></span><span class="line"><span class="cl">    <span class="n">pcre2_match_data</span> <span class="o">*</span><span class="n">match_data</span> <span class="o">=</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">pcre2_match_data_create_from_pattern</span><span class="p">(</span><span class="n">re</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">rc</span> <span class="o">=</span> <span class="nf">pcre2_match</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="n">re</span><span class="p">,</span>                   <span class="cm">/* the compiled pattern */</span>
+</span></span><span class="line"><span class="cl">        <span class="n">subject</span><span class="p">,</span>              <span class="cm">/* the subject text */</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">strlen</span><span class="p">(</span><span class="n">subject</span><span class="p">),</span>      <span class="cm">/* the length of the subject */</span>
+</span></span><span class="line"><span class="cl">        <span class="mi">0</span><span class="p">,</span>                    <span class="cm">/* start at offset 0 in the subject */</span>
+</span></span><span class="line"><span class="cl">        <span class="mi">0</span><span class="p">,</span>                    <span class="cm">/* default options */</span>
+</span></span><span class="line"><span class="cl">        <span class="n">match_data</span><span class="p">,</span>           <span class="cm">/* block for storing the result */</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">NULL</span><span class="p">);</span>                <span class="cm">/* use default match context */</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="cm">/* Print the match result. */</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span><span class="n">rc</span> <span class="o">==</span> <span class="n">PCRE2_ERROR_NOMATCH</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;No match</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">rc</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">&#34;Matching error</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">PCRE2_SIZE</span> <span class="o">*</span><span class="n">ovector</span> <span class="o">=</span> <span class="nf">pcre2_get_ovector_pointer</span><span class="p">(</span><span class="n">match_data</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="nf">printf</span><span class="p">(</span><span class="s">&#34;Found match: &#39;%.*s&#39;</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="p">(</span><span class="kt">int</span><span class="p">)(</span><span class="n">ovector</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ovector</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+</span></span><span class="line"><span class="cl">               <span class="n">subject</span> <span class="o">+</span> <span class="n">ovector</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="nf">pcre2_match_data_free</span><span class="p">(</span><span class="n">match_data</span><span class="p">);</span>   <span class="cm">/* Free resources */</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">pcre2_code_free</span><span class="p">(</span><span class="n">re</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div></details>
+<hr>
+<p>The main ways of obtaining PCRE2 are:</p>
+<ol>
+<li>
+<p>Via Git clone:</p>
+<pre tabindex="0"><code>git clone https://github.com/PCRE2Project/pcre2.git
+</code></pre><p>Please use a release tag in production, not the development branch!</p>
+</li>
+<li>
+<p>Via download of the <a href="https://github.com/PCRE2Project/pcre2/releases/latest">release tarball</a>.</p>
+</li>
+<li>
+<p>Finally, PCRE2 is also bundled by various downstream package managers (such as Linux distributions, or <a href="https://vcpkg.io/">vcpkg</a>). These are provided by third parties, not the PCRE2 project.</p>
+</li>
+</ol>
+<p>The main ways of building PCRE2 are:</p>
+<ol>
+<li>
+<p>Via CMake (Linux/Windows/macOS, and others)</p>
+<pre tabindex="0"><code>cd pcre2/
+cmake -B build .
+cmake --build build/
+</code></pre></li>
+<li>
+<p>Via Autoconf (Linux/Unix)</p>
+<pre tabindex="0"><code>cd pcre2/
+./configure
+make
+</code></pre></li>
+</ol>
+<p>See <a href="#platforms">&ldquo;Platforms&rdquo;</a> below for links to more detailed build documentation.</p>
+<h2 id="api-overview">API Overview</h2>
+<p>The PCRE2 API supports strings in 8-bit, 16-bit, and 32-bit encodings, with or without UTF encoding. There is also EBCDIC support.</p>
+<p>The default regular expression dialect closely matches the syntax and behaviour of Perl 5, with PCRE2-specific extensions. A wide variety of granular flags can be passed to the PCRE2 API to customise this to more closely follow other dialects such as JavaScript or Python.</p>
+<p>The default matching engine uses a depth-first tree search with backtracking, which is highly feature-rich but has worst-case exponential time (PCRE2 allows aborting the match if a time limit is exceeded, expressed as a maximum number of steps in the tree search). The second matching engine uses a JIT for greatly improved performance, compiling the regular expression to a block of equivalent native machine code.</p>
+<p>PCRE2 has a third matching engine, using a DFA engine which is generally slower, but has worst-case polynomial matching time and is able to find the POSIX-style &ldquo;leftmost-longest&rdquo; match.</p>
+<p>There are accompanying utility functions for converting glob patterns and POSIX BRE/ERE patterns to PCRE2 regular expressions; and also for performing high-level regular expression operations such as search-and-replace with a powerful replacement string syntax.</p>
+<p>As well as the PCRE2 API, the library also offers a POSIX-compatible <code>&lt;regex.h&gt;</code> header and <code>regexec()</code> function. However, this does not provide the ability to pass PCRE2 flags, so we recommend users consume the PCRE2 API if possible.</p>
+<p>See the <a href="./doc/">full library and API documentation</a> for further details.</p>
+<p>For third-party documentation, see further:</p>
+<ul>
+<li>A curated summary of changes for each PCRE release, and some excellent tutorials on PCRE2 on the
+<a href="http://www.rexegg.com/pcre-documentation.html">RexEgg website</a>.</li>
+<li>Jan Goyvaerts&rsquo; popular Regular-Expressions.info site includes <a href="https://www.regular-expressions.info/pcre.html">information about PCRE2</a> as well as tutorials and highly detailed comparisons of PCRE2 to other regular expression dialects.</li>
+<li>Jeffrey Friedl&rsquo;s book <a href="https://regex.info/book.html"><em>Mastering Regular Expressions</em></a> includes chapters on Perl and PCRE, and is available in print and online via O&rsquo;Reilly Media.</li>
+</ul>
+<h2 id="platforms">Platforms</h2>
+<p>PCRE2 is portable C code, and is likely to work on any system with a C99 compiler.</p>
+<dl>
+<dt>Operating systems</dt>
+<dd>
+Our continuous integration tests on <strong>Linux</strong> (GCC and Clang, glibc and musl), <strong>Windows</strong> (MSVC and MinGW-x64), and <strong>macOS</strong> (Clang), as well as <strong>FreeBSD</strong>, and <strong>Solaris</strong> (Oracle Studio <code>cc</code>).
+</dd>
+<dt>Processors</dt>
+<dd>
+PCRE2 is tested continuously on x86 (i686 and amd64), ARM 32- and 64-bit (armv7 and aarch64), RISC-V (riscv64), POWER (ppc64le), and the big-endian S390x.
+</dd>
+</dl>
+<p>Other systems are likely to work (including mobile, embedded platforms, and commercial UNIX systems), but these are not tested continuously by the PCRE2 maintainers. Users are encouraged to run the full PCRE2 test suite when compiling for any new platform. We are aware of working ports to VMS and z/OS (PCRE2 supports EBCDIC).</p>
+<p>PCRE2 releases support CMake for building, and for UNIX platforms include a <code>./configure</code> script built by Autoconf. Build files for the Bazel build system and <code>zig build</code> are also included. Integrating PCRE2 with other systems can be done by including the <code>.c</code> files in an existing project.</p>
+<p>Please see the files <a href="./guide/readme/">README</a> and <a href="./guide/non-autotools-build/">NON-AUTOTOOLS-BUILD</a> for full build documentation, as well as the man pages, including <a href="./doc/pcre2build/"><code>man pcre2/doc/pcre2build.3</code></a>.</p>
+<h2 id="licence">Licence</h2>
+<p>PCRE2 is released under the <strong>BSD 3-clause licence</strong> with a PCRE2 Exception. It is open-source and also corporate-friendly.</p>
+<ul>
+<li>See <a href="./project/licence/">LICENCE</a> for legal text.</li>
+<li>See <a href="./project/authors/">AUTHORS</a> for details of the current maintainers of PCRE2 and acknowledgements of its contributors, including Philip Hazel, the original author.</li>
+</ul>
+<h2 id="contributing--support">Contributing &amp; support</h2>
+<p>Join the community by reporting issues or asking questions via <a href="https://github.com/PCRE2Project/pcre2/issues">GitHub issues</a>. We welcome feedback and proposals.</p>
+<p>Contributions ranging from bug fixes to feature requests are welcome, and can be made via GitHub pull requests.</p>
+<p>Please review our <a href="./project/security/">SECURITY</a> policy for information on reporting security issues.</p>
+<p>Release announcements will be made via the <a href="https://groups.google.com/g/pcre2-dev">pcre2-dev@googlegroups.com</a> mailing list, where you can also start discussions about PCRE2 issues and development. You can browse the <a href="https://groups.google.com/g/pcre2-dev">list archives</a>.</p>
+
+</div>
+</main>
+
+<div class="footer-glue"></div>
+
+<footer>
+	
+</footer>
+
+</body>
+</html>
+

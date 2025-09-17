@@ -50,6 +50,7 @@ library. */
 // XXX fix
 
 // #ifdef SUPPORT_PCRE2_8
+// XXX init all to NULL
 // static pcre2_code_8             *compiled_code8;
 // static pcre2_general_context_8  *general_context8, *general_context_copy8;
 // static pcre2_compile_context_8  *pat_context8, *default_pat_context8;
@@ -593,6 +594,494 @@ return 0;
 
 
 /*************************************************
+*        Check a modifer and find its field      *
+*************************************************/
+
+/* This function is called when a modifier has been identified. We check that
+it is allowed here and find the field that is to be changed.
+
+Arguments:
+  m          the modifier list entry
+  ctx        CTX_PAT     => pattern context
+             CTX_POPPAT  => pattern context for popped pattern
+             CTX_DEFPAT  => default pattern context
+             CTX_DAT     => data context
+             CTX_DEFDAT  => default data context
+  pctl       point to pattern control block
+  dctl       point to data control block
+  c          a single character or 0
+
+Returns:     a field pointer or NULL
+*/
+
+static void *
+check_modifier(modstruct *m, int ctx, patctl *pctl, datctl *dctl, uint32_t c)
+{
+void *field = NULL;
+PCRE2_SIZE offset = m->offset;
+
+if (restrict_for_perl_test) switch(m->which)
+  {
+  case MOD_PNDP:
+  case MOD_PATP:
+  case MOD_DATP:
+  case MOD_PDP:
+  break;
+
+  default:
+  fprintf(outfile, "** \"%s\" is not allowed in a Perl-compatible test\n",
+    m->name);
+  return NULL;
+  }
+
+switch (m->which)
+  {
+  case MOD_CTC:  /* Compile context modifier */
+  if (ctx == CTX_DEFPAT) field = contexts->default_pat_context;
+    else if (ctx == CTX_PAT) field = contexts->pat_context;
+  break;
+
+  case MOD_CTM:  /* Match context modifier */
+  if (ctx == CTX_DEFDAT) field = contexts->default_dat_context;
+    else if (ctx == CTX_DAT) field = contexts->dat_context;
+  break;
+
+  case MOD_DAT:    /* Data line modifier */
+  case MOD_DATP:   /* Allowed for Perl test */
+  if (dctl != NULL) field = dctl;
+  break;
+
+  case MOD_PAT:    /* Pattern modifier */
+  case MOD_PATP:   /* Allowed for Perl test */
+  if (pctl != NULL) field = pctl;
+  break;
+
+  case MOD_PD:   /* Pattern or data line modifier */
+  case MOD_PDP:  /* Ditto, allowed for Perl test */
+  case MOD_PND:  /* Ditto, but not default pattern */
+  case MOD_PNDP: /* Ditto, allowed for Perl test */
+  if (dctl != NULL) field = dctl;
+    else if (pctl != NULL && (m->which == MOD_PD || m->which == MOD_PDP ||
+             ctx != CTX_DEFPAT))
+      field = pctl;
+  break;
+  }
+
+if (field == NULL)
+  {
+  if (c == 0)
+    fprintf(outfile, "** \"%s\" is not valid here\n", m->name);
+  else
+    fprintf(outfile, "** /%c is not valid here\n", c);
+  return NULL;
+  }
+
+return (char *)field + offset;
+}
+
+
+
+/*************************************************
+*            Decode a modifier list              *
+*************************************************/
+
+/* A pointer to a control block is NULL when called in cases when that block is
+not relevant. They are never all relevant in one call. At least one of patctl
+and datctl is NULL. The second argument specifies which context to use for
+modifiers that apply to contexts.
+
+Arguments:
+  p          point to modifier string
+  ctx        CTX_PAT     => pattern context
+             CTX_POPPAT  => pattern context for popped pattern
+             CTX_DEFPAT  => default pattern context
+             CTX_DAT     => data context
+             CTX_DEFDAT  => default data context
+  pctl       point to pattern control block
+  dctl       point to data control block
+
+Returns: TRUE if successful decode, FALSE otherwise
+*/
+
+static BOOL
+decode_modifiers(uint8_t *p, int ctx, patctl *pctl, datctl *dctl)
+{
+uint8_t *ep, *pp;
+long li;
+unsigned long uli;
+BOOL first = TRUE;
+
+for (;;)
+  {
+  void *field;
+  modstruct *m;
+  BOOL off = FALSE;
+  unsigned int i;
+  size_t len;
+  int index;
+  char *endptr;
+
+  /* Skip white space and commas. */
+
+  while (isspace(*p) || *p == ',') p++;
+  if (*p == 0) break;
+
+  /* Find the end of the item; lose trailing whitespace at end of line. */
+
+  for (ep = p; *ep != 0 && *ep != ','; ep++);
+  if (*ep == 0)
+    {
+    while (ep > p && isspace(ep[-1])) ep--;
+    *ep = 0;
+    }
+
+  /* Remember if the first character is '-'. */
+
+  if (*p == '-')
+    {
+    off = TRUE;
+    p++;
+    }
+
+  /* Find the length of a full-length modifier name, and scan for it. */
+
+  pp = p;
+  while (pp < ep && *pp != '=') pp++;
+  index = scan_modifiers(p, pp - p);
+
+  /* If the first modifier is unrecognized, try to interpret it as a sequence
+  of single-character abbreviated modifiers. None of these modifiers have any
+  associated data. They just set options or control bits. */
+
+  if (index < 0)
+    {
+    uint32_t cc;
+    uint8_t *mp = p;
+
+    if (!first)
+      {
+      fprintf(outfile, "** Unrecognized modifier \"%.*s\"\n", (int)(ep-p), p);
+      if (ep - p == 1)
+        fprintf(outfile, "** Single-character modifiers must come first\n");
+      return FALSE;
+      }
+
+    first = FALSE;
+
+    for (cc = *p; cc != ',' && cc != '\n' && cc != 0; cc = *(++p))
+      {
+      for (i = 0; i < C1MODLISTCOUNT; i++)
+        if (cc == c1modlist[i].onechar) break;
+
+      if (i >= C1MODLISTCOUNT)
+        {
+        fprintf(outfile, "** Unrecognized modifier '%c' in modifier string "
+          "\"%.*s\"\n", *p, (int)(ep-mp), mp);
+        return FALSE;
+        }
+
+      if (c1modlist[i].index >= 0)
+        {
+        index = c1modlist[i].index;
+        }
+
+      else
+        {
+        index = scan_modifiers((const uint8_t *)(c1modlist[i].fullname),
+          strlen(c1modlist[i].fullname));
+        if (index < 0)
+          {
+          fprintf(outfile, "** Internal error: single-character equivalent "
+            "modifier \"%s\" not found\n", c1modlist[i].fullname);
+          return FALSE;
+          }
+        c1modlist[i].index = index;     /* Cache for next time */
+        }
+
+      field = check_modifier(modlist + index, ctx, pctl, dctl, contexts, *p);
+      if (field == NULL) return FALSE;
+
+      /* /x is a special case; a second appearance changes PCRE2_EXTENDED to
+      PCRE2_EXTENDED_MORE. */
+
+      if (cc == 'x' && (*((uint32_t *)field) & PCRE2_EXTENDED) != 0)
+        {
+        *((uint32_t *)field) &= ~PCRE2_EXTENDED;
+        *((uint32_t *)field) |= PCRE2_EXTENDED_MORE;
+        }
+      else
+        *((uint32_t *)field) |= modlist[index].value;
+      }
+
+    continue;    /* With tne next (fullname) modifier */
+    }
+
+  /* We have a match on a full-name modifier. Check for the existence of data
+  when needed. */
+
+  m = modlist + index;      /* Save typing */
+  if (m->type != MOD_CTL && m->type != MOD_OPT && m->type != MOD_OPTMZ &&
+      (m->type != MOD_IND || *pp == '='))
+    {
+    if (*pp++ != '=')
+      {
+      fprintf(outfile, "** '=' expected after \"%s\"\n", m->name);
+      return FALSE;
+      }
+    if (off)
+      {
+      fprintf(outfile, "** '-' is not valid for \"%s\"\n", m->name);
+      return FALSE;
+      }
+    }
+
+  /* These on/off types have no data. */
+
+  else if (*pp != ',' && *pp != '\n' && *pp != ' ' && *pp != 0)
+    {
+    fprintf(outfile, "** Unrecognized modifier '%.*s'\n", (int)(ep-p), p);
+    return FALSE;
+    }
+
+  /* Set the data length for those types that have data. Then find the field
+  that is to be set. If check_modifier() returns NULL, it has already output an
+  error message. */
+
+  len = ep - pp;
+  field = check_modifier(m, ctx, pctl, dctl, contexts, *p);
+  if (field == NULL) return FALSE;
+
+  /* Process according to data type. */
+
+  switch (m->type)
+    {
+    case MOD_CTL:
+    case MOD_OPT:
+    if (off) *((uint32_t *)field) &= ~m->value;
+      else *((uint32_t *)field) |= m->value;
+    break;
+
+    case MOD_OPTMZ:
+    pcre2_set_optimize(field, m->value);
+    break;
+
+    case MOD_BSR:
+    if (len == 7 && strncmpic(pp, (const uint8_t *)"default", 7) == 0)
+      {
+#ifdef BSR_ANYCRLF
+      *((uint16_t *)field) = PCRE2_BSR_ANYCRLF;
+#else
+      *((uint16_t *)field) = PCRE2_BSR_UNICODE;
+#endif
+      if (ctx == CTX_PAT || ctx == CTX_DEFPAT) pctl->control2 &= ~CTL2_BSR_SET;
+        else dctl->control2 &= ~CTL2_BSR_SET;
+      }
+    else
+      {
+      if (len == 7 && strncmpic(pp, (const uint8_t *)"anycrlf", 7) == 0)
+        *((uint16_t *)field) = PCRE2_BSR_ANYCRLF;
+      else if (len == 7 && strncmpic(pp, (const uint8_t *)"unicode", 7) == 0)
+        *((uint16_t *)field) = PCRE2_BSR_UNICODE;
+      else goto INVALID_VALUE;
+      if (ctx == CTX_PAT || ctx == CTX_DEFPAT) pctl->control2 |= CTL2_BSR_SET;
+        else dctl->control2 |= CTL2_BSR_SET;
+      }
+    pp = ep;
+    break;
+
+    case MOD_CHR:  /* A single character */
+    *((uint32_t *)field) = *pp++;
+    break;
+
+    case MOD_CON:  /* A convert type/options list */
+    for (;; pp++)
+      {
+      uint8_t *colon = (uint8_t *)strchr((const char *)pp, ':');
+      len = ((colon != NULL && colon < ep)? colon:ep) - pp;
+      for (i = 0; i < convertlistcount; i++)
+        {
+        if (strncmpic(pp, (const uint8_t *)convertlist[i].name, len) == 0)
+          {
+          if (*((uint32_t *)field) == CONVERT_UNSET)
+            *((uint32_t *)field) = convertlist[i].option;
+          else
+            *((uint32_t *)field) |= convertlist[i].option;
+          break;
+          }
+        }
+      if (i >= convertlistcount) goto INVALID_VALUE;
+      pp += len;
+      if (*pp != ':') break;
+      }
+    break;
+
+    case MOD_IN2:    /* One or two unsigned integers */
+    if (!isdigit(*pp)) goto INVALID_VALUE;
+    uli = strtoul((const char *)pp, &endptr, 10);
+    if (U32OVERFLOW(uli)) goto INVALID_VALUE;
+    ((uint32_t *)field)[0] = (uint32_t)uli;
+    if (*endptr == ':')
+      {
+      uli = strtoul((const char *)endptr+1, &endptr, 10);
+      if (U32OVERFLOW(uli)) goto INVALID_VALUE;
+      ((uint32_t *)field)[1] = (uint32_t)uli;
+      }
+    else ((uint32_t *)field)[1] = 0;
+    pp = (uint8_t *)endptr;
+    break;
+
+    /* PCRE2_SIZE_MAX is usually SIZE_MAX, which may be greater, equal to, or
+    less than ULONG_MAX. So first test for overflowing the long int, and then
+    test for overflowing PCRE2_SIZE_MAX if it is smaller than ULONG_MAX. */
+
+    case MOD_SIZ:    /* PCRE2_SIZE value */
+    if (!isdigit(*pp)) goto INVALID_VALUE;
+    uli = strtoul((const char *)pp, &endptr, 10);
+    if (uli == ULONG_MAX) goto INVALID_VALUE;
+#if ULONG_MAX > PCRE2_SIZE_MAX
+    if (uli > PCRE2_SIZE_MAX) goto INVALID_VALUE;
+#endif
+    *((PCRE2_SIZE *)field) = (PCRE2_SIZE)uli;
+    pp = (uint8_t *)endptr;
+    break;
+
+    case MOD_IND:    /* Unsigned integer with default */
+    if (len == 0)
+      {
+      *((uint32_t *)field) = (uint32_t)(m->value);
+      break;
+      }
+    PCRE2_FALLTHROUGH /* Fall through */
+
+    case MOD_INT:    /* Unsigned integer */
+    if (!isdigit(*pp)) goto INVALID_VALUE;
+    uli = strtoul((const char *)pp, &endptr, 10);
+    if (U32OVERFLOW(uli)) goto INVALID_VALUE;
+    *((uint32_t *)field) = (uint32_t)uli;
+    pp = (uint8_t *)endptr;
+    break;
+
+    case MOD_INS:   /* Signed integer */
+    if (!isdigit(*pp) && *pp != '-') goto INVALID_VALUE;
+    li = strtol((const char *)pp, &endptr, 10);
+    if (S32OVERFLOW(li)) goto INVALID_VALUE;
+    *((int32_t *)field) = (int32_t)li;
+    pp = (uint8_t *)endptr;
+    break;
+
+    case MOD_NL:
+    for (i = 0; i < sizeof(newlines)/sizeof(char *); i++)
+      if (len == strlen(newlines[i]) &&
+        strncmpic(pp, (const uint8_t *)newlines[i], len) == 0) break;
+    if (i >= sizeof(newlines)/sizeof(char *)) goto INVALID_VALUE;
+    if (i == 0)
+      {
+      *((uint16_t *)field) = NEWLINE_DEFAULT;
+      if (ctx == CTX_PAT || ctx == CTX_DEFPAT) pctl->control2 &= ~CTL2_NL_SET;
+        else dctl->control2 &= ~CTL2_NL_SET;
+      }
+    else
+      {
+      *((uint16_t *)field) = i;
+      if (ctx == CTX_PAT || ctx == CTX_DEFPAT) pctl->control2 |= CTL2_NL_SET;
+        else dctl->control2 |= CTL2_NL_SET;
+      }
+    pp = ep;
+    break;
+
+    case MOD_NN:              /* Name or (signed) number; may be several */
+    if (isdigit(*pp) || *pp == '-')
+      {
+      int ct = MAXCPYGET - 1;
+      int32_t value;
+      li = strtol((const char *)pp, &endptr, 10);
+      if (S32OVERFLOW(li)) goto INVALID_VALUE;
+      value = (int32_t)li;
+      field = (char *)field - m->offset + m->value;      /* Adjust field ptr */
+      if (value >= 0)                                    /* Add new number */
+        {
+        while (*((int32_t *)field) >= 0 && ct-- > 0)   /* Skip previous */
+          field = (char *)field + sizeof(int32_t);
+        if (ct <= 0)
+          {
+          fprintf(outfile, "** Too many numeric \"%s\" modifiers\n", m->name);
+          return FALSE;
+          }
+        }
+      *((int32_t *)field) = value;
+      if (ct > 0) ((int32_t *)field)[1] = -1;
+      pp = (uint8_t *)endptr;
+      }
+
+    /* Multiple strings are put end to end. */
+
+    else
+      {
+      char *nn = (char *)field;
+      if (len > 0)                    /* Add new name */
+        {
+        if (len > MAX_NAME_SIZE)
+          {
+          fprintf(outfile, "** Group name in \"%s\" is too long\n", m->name);
+          return FALSE;
+          }
+        while (*nn != 0) nn += strlen(nn) + 1;
+        if (nn + len + 2 - (char *)field > LENCPYGET)
+          {
+          fprintf(outfile, "** Too many characters in named \"%s\" modifiers\n",
+            m->name);
+          return FALSE;
+          }
+        memcpy(nn, pp, len);
+        }
+      nn[len] = 0 ;
+      nn[len+1] = 0;
+      pp = ep;
+      }
+    break;
+
+    case MOD_STR:
+    if (len + 1 > m->value)
+      {
+      fprintf(outfile, "** Overlong value for \"%s\" (max %d code units)\n",
+        m->name, m->value - 1);
+      return FALSE;
+      }
+    memcpy(field, pp, len);
+    ((uint8_t *)field)[len] = 0;
+    pp = ep;
+    break;
+    }
+
+  if (*pp != ',' && *pp != '\n' && *pp != ' ' && *pp != 0)
+    {
+    fprintf(outfile, "** Comma expected after modifier item \"%s\"\n", m->name);
+    return FALSE;
+    }
+
+  p = pp;
+
+  if (ctx == CTX_POPPAT &&
+     (pctl->options != 0 ||
+      pctl->tables_id != 0 ||
+      pctl->locale[0] != 0 ||
+      (pctl->control & NOTPOP_CONTROLS) != 0))
+    {
+    fprintf(outfile, "** \"%s\" is not valid here\n", m->name);
+    return FALSE;
+    }
+  }
+
+return TRUE;
+
+INVALID_VALUE:
+fprintf(outfile, "** Invalid value in \"%.*s\"\n", (int)(ep-p), p);
+return FALSE;
+}
+
+
+
+/*************************************************
 *             Get info from a pattern            *
 *************************************************/
 
@@ -708,22 +1197,34 @@ fprintf(outfile, "Heapframes size in match_data: %" SIZ_FORM "\n",
 *************************************************/
 
 static BOOL
-print_error_message(int errorcode, const char *before, const char *after)
+print_error_message_file(FILE *file, int errorcode, const char *before,
+  const char *after, BOOL badcode_ok)
 {
 int len;
 PCRE2_GET_ERROR_MESSAGE(len, errorcode);
-if (len < 0)
+if (len == PCRE2_ERROR_BADDATA && badcode_ok)
   {
-  fprintf(outfile, "\n** pcre2test internal error: cannot interpret error "
+  fprintf(file, "%sPCRE2_ERROR_BADDATA (unknown error number)%s", before,
+    after);
+  }
+else if (len < 0)
+  {
+  fprintf(file, "\n** pcre2test internal error: cannot interpret error "
     "number\n** Unexpected return (%d) from pcre2_get_error_message()\n", len);
   }
 else
   {
-  fprintf(outfile, "%s", before);
-  PCHARSV(errorbuffer, 0, len, FALSE, outfile);
-  fprintf(outfile, "%s", after);
+  fprintf(file, "%s", before);
+  PCHARSV(errorbuffer, 0, len, FALSE, file);
+  fprintf(file, "%s", after);
   }
 return len >= 0;
+}
+
+static BOOL
+print_error_message(int errorcode, const char *before, const char *after)
+{
+return print_error_message_file(outfile, errorcode, before, after, FALSE);
 }
 
 
@@ -1313,6 +1814,7 @@ switch(cmd)
   if (!decode_modifiers(argptr, CTX_POPPAT, &pat_patctl, NULL))
     return PR_SKIP;
 
+  // XXX are we leaking anything here?
   if (cmd == CMD_POP)
     {
     SET(compiled_code, patstack[--patstacknext]);
@@ -2600,6 +3102,29 @@ if ((pat_patctl.control & (CTL_PUSHCOPY|CTL_PUSHTABLESCOPY)) != 0)
   }
 
 return PR_OK;
+}
+
+
+
+/* Helper to test for an active pattern. */
+
+static BOOL
+have_active_pattern(void)
+{
+return compiled_code != NULL;
+}
+
+
+/* Helper to free (and null-out) the active pattern. */
+
+static void
+free_active_pattern(void)
+{
+if (compiled_code != NULL)
+  {
+  pcre2_code_free(compiled_code);
+  compiled_code = NULL;
+  }
 }
 
 
@@ -5018,5 +5543,36 @@ if ((dat_datctl.control2 & CTL2_HEAPFRAMES_SIZE) != 0 &&
 show_memory = FALSE;
 return PR_OK;
 }
+
+
+
+/*************************************************
+*      Initialise the mode-dependent globals     *
+*************************************************/
+
+/* Sets up the global variables used for the current test mode. */
+
+static void
+init_globals(void)
+{
+  
+#define CREATECONTEXTS \
+  G(general_context,BITS) = G(pcre2_general_context_create_,BITS)(&my_malloc, &my_free, NULL); \
+  G(general_context_copy,BITS) = G(pcre2_general_context_copy_,BITS)(G(general_context,BITS)); \
+  G(default_pat_context,BITS) = G(pcre2_compile_context_create_,BITS)(G(general_context,BITS)); \
+  G(pat_context,BITS) = G(pcre2_compile_context_copy_,BITS)(G(default_pat_context,BITS)); \
+  G(default_dat_context,BITS) = G(pcre2_match_context_create_,BITS)(G(general_context,BITS)); \
+  G(dat_context,BITS) = G(pcre2_match_context_copy_,BITS)(G(default_dat_context,BITS)); \
+  G(default_con_context,BITS) = G(pcre2_convert_context_create_,BITS)(G(general_context,BITS)); \
+  G(con_context,BITS) = G(pcre2_convert_context_copy_,BITS)(G(default_con_context,BITS)); \
+  G(match_data,BITS) = G(pcre2_match_data_create_,BITS)(max_oveccount, G(general_context,BITS))
+
+/* Set a default parentheses nest limit that is large enough to run the
+standard tests (this also exercises the function). */
+
+pcre2_set_parens_nest_limit(default_pat_context, PARENS_NEST_DEFAULT);
+}
+
+
 
 /* End of pcre2test_inc.h */

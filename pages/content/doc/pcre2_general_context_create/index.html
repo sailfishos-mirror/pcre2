@@ -1,0 +1,35 @@
++++
+title = "pcre2_general_context_create"
+aliases = ["/doc/html/pcre2_general_context_create.html"]
++++
+
+<h2>
+SYNOPSIS
+</h2>
+<p>
+<b>#include &#60;pcre2.h&#62;</b>
+</p>
+<p>
+<b>pcre2_general_context *pcre2_general_context_create(</b><br>
+
+<b>  void *(*<i>private_malloc</i>)(size_t, void *),</b><br>
+
+<b>  void (*<i>private_free</i>)(void *, void *), void *<i>memory_data</i>);</b><br>
+
+</p>
+<h2>
+DESCRIPTION
+</h2>
+<p>
+This function creates and initializes a general context. The arguments define
+custom memory management functions and a data value that is passed to them when
+they are called. The <b>private_malloc()</b> function is used to get memory for
+the context. If either of the first two arguments is NULL, the system memory
+management function is used. The result is NULL if no memory could be obtained.
+</p>
+<p>
+There is a complete description of the PCRE2 native API in the
+<a href="../pcre2api/"><b>pcre2api</b></a>
+page and a description of the POSIX API in the
+<a href="../pcre2posix/"><b>pcre2posix</b></a>
+page.

@@ -1,0 +1,30 @@
++++
+title = "pcre2_convert_context_copy"
+aliases = ["/doc/html/pcre2_convert_context_copy.html"]
++++
+
+<h2>
+SYNOPSIS
+</h2>
+<p>
+<b>#include &#60;pcre2.h&#62;</b>
+</p>
+<p>
+<b>pcre2_convert_context *pcre2_convert_context_copy(</b><br>
+
+<b>  pcre2_convert_context *<i>cvcontext</i>);</b><br>
+
+</p>
+<h2>
+DESCRIPTION
+</h2>
+<p>
+This function is part of an experimental set of pattern conversion functions.
+It makes a new copy of a convert context, using the memory allocation function
+that was used for the original context. The result is NULL if the memory cannot
+be obtained.
+</p>
+<p>
+The pattern conversion functions are described in the
+<a href="../pcre2convert/"><b>pcre2convert</b></a>
+documentation.

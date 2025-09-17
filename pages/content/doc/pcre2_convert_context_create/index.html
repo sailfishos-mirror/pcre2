@@ -1,0 +1,31 @@
++++
+title = "pcre2_convert_context_create"
+aliases = ["/doc/html/pcre2_convert_context_create.html"]
++++
+
+<h2>
+SYNOPSIS
+</h2>
+<p>
+<b>#include &#60;pcre2.h&#62;</b>
+</p>
+<p>
+<b>pcre2_convert_context *pcre2_convert_context_create(</b><br>
+
+<b>  pcre2_general_context *<i>gcontext</i>);</b><br>
+
+</p>
+<h2>
+DESCRIPTION
+</h2>
+<p>
+This function is part of an experimental set of pattern conversion functions.
+It creates and initializes a new convert context. If its argument is
+NULL, <b>malloc()</b> is used to get the necessary memory; otherwise the memory
+allocation function within the general context is used. The result is NULL if
+the memory could not be obtained.
+</p>
+<p>
+The pattern conversion functions are described in the
+<a href="../pcre2convert/"><b>pcre2convert</b></a>
+documentation.

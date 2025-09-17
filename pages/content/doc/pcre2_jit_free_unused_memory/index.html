@@ -1,0 +1,32 @@
++++
+title = "pcre2_jit_free_unused_memory"
+aliases = ["/doc/html/pcre2_jit_free_unused_memory.html"]
++++
+
+<h2>
+SYNOPSIS
+</h2>
+<p>
+<b>#include &#60;pcre2.h&#62;</b>
+</p>
+<p>
+<b>void pcre2_jit_free_unused_memory(pcre2_general_context *<i>gcontext</i>);</b><br>
+
+</p>
+<h2>
+DESCRIPTION
+</h2>
+<p>
+This function frees unused JIT executable memory. The argument is a general
+context, for custom memory management, or NULL for standard memory management.
+JIT memory allocation retains some memory in order to improve future JIT
+compilation speed. In low memory conditions,
+<b>pcre2_jit_free_unused_memory()</b> can be used to cause this memory to be
+freed.
+</p>
+<p>
+There is a complete description of the PCRE2 native API in the
+<a href="../pcre2api/"><b>pcre2api</b></a>
+page and a description of the POSIX API in the
+<a href="../pcre2posix/"><b>pcre2posix</b></a>
+page.

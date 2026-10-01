@@ -596,7 +596,8 @@ that provide POSIX-style matching.</p>
 </div>
 <div class="paragraph">
 <p>The argument <code class="parameter">cflags</code> is either zero, or contains one or more of the bits
-defined by the following macros:</p>
+defined by the following macros. Any other option bits cause
+<code class="constant">REG_INVARG</code> to be returned.</p>
 </div>
 <div class="dlist options">
 <dl>
@@ -694,6 +695,10 @@ are defined in the header file.</p>
 to use the contents of the <code class="parameter">preg</code> structure. If, for example, you pass it
 to <code class="function">pcre2_regexec()</code>, the result is undefined and your program is likely to
 crash.</p>
+</div>
+<div class="paragraph">
+<p>The <code class="parameter">preg</code> structure can still be passed to <code class="function">pcre2_regerror()</code> after a
+compilation error.</p>
 </div>
 </td>
 </tr>
@@ -818,7 +823,8 @@ passes <code class="constant">PCRE2_DOTALL</code>. There is no way to pass <code
 <p>The function <code class="function">pcre2_regexec()</code> is called to match a compiled pattern
 <code class="parameter">preg</code> against a given <code class="parameter">string</code>, which is by default terminated by a
 zero byte (but see <code class="constant">REG_STARTEND</code> below), subject to the options in <code class="parameter">eflags</code>.
-These can be:</p>
+Any option bits other than those listed below cause <code class="constant">REG_INVARG</code> to be
+returned.</p>
 </div>
 <div class="dlist options">
 <dl>
@@ -891,7 +897,10 @@ similarly named types from other libraries that provide POSIX-style matching.</p
 </div>
 <div class="paragraph">
 <p>A successful match yields a zero return; various error codes are defined in the
-header file, of which <code class="constant">REG_NOMATCH</code> is the "expected" failure code.</p>
+header file, of which <code class="constant">REG_NOMATCH</code> is the "expected" failure code.
+Memory allocation failures and heap, match, or depth limit exhaustion return
+<code class="constant">REG_ESPACE</code>. Pattern errors detected during matching, such as recursion
+loops or invalid uses of <code class="regex">\K</code>, return <code class="constant">REG_BADPAT</code>.</p>
 </div>
 </div>
 </div>
